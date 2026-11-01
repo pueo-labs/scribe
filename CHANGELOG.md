@@ -12,6 +12,9 @@ milestones that predate this repository's Git history.
 
 ### Fixed
 
+- The optional Omarchy voice widget follows the shell theme and keeps its
+  file reads asynchronous. `MICROPHONE ON` stays written in words. The widget
+  still does not claim a live microphone, focus, or recovery record.
 - An unreachable OBS process no longer leads to a second recording whose only
   stop is manual. Scribe still attempts one idle relaunch, and it starts
   capture only when WebSocket can stop that instance.

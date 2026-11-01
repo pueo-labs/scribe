@@ -7,9 +7,11 @@ the resident `scribe voice serve` owner:
 
 The file may contain only a schema version, a state, a microphone value,
 a generation, and a timestamp. The widget shows `MICROPHONE ON`,
-`microphone off`, or `microphone unknown`. A missing owner, a stale file, a
-failed read, or a malformed file is unknown or unavailable. Those outcomes do
-not mean the microphone is off.
+`microphone off`, or `microphone unknown`. Those words are the signal. Colors
+follow the shell theme, and the widget does not animate. A missing owner, a
+stale file, a failed read, or a malformed file is unknown or unavailable.
+Those outcomes do not mean the microphone is off. File reads are asynchronous
+so a slow or missing file does not stall the shell.
 
 This widget does not start Scribe, open a microphone, load a model, dictate,
 paste, read aloud, or call a provider. It runs with the user's Quickshell

@@ -116,6 +116,42 @@ def test_projection_write_failure_stays_inside_the_owner(tmp_path: Path, monkeyp
     service.publish_status_projection()
 
 
+def test_owner_restart_replaces_the_previous_generation():
+    seen = SeenProjection(generation=3, updated_at=1_000.0)
+    view, nxt = interpret(
+        _payload(generation=4, updated_at=1_001.0, state="speaking", microphone="on"),
+        now=1_001.2,
+        seen=seen,
+    )
+    assert view.outcome == "current"
+    assert view.label == "MICROPHONE ON"
+    assert nxt is not None and nxt.generation == 4
+
+
+def test_stale_owner_is_unknown_not_off():
+    view, _ = interpret(
+        _payload(state="recording", microphone="on"),
+        now=1_006.0,
+        seen=None,
+    )
+    assert view.outcome == "unknown"
+    assert view.label == "microphone unknown"
+    assert view.microphone != "off"
+
+
+def test_permission_error_is_unknown_not_off(tmp_path: Path):
+    path = tmp_path / "voice-projection.json"
+    path.write_bytes(_payload(state="recording", microphone="on"))
+    path.chmod(0)
+    try:
+        view, _ = read_projection(path, now=1_001.0)
+    finally:
+        path.chmod(0o600)
+    assert view.outcome == "unknown"
+    assert view.label == "microphone unknown"
+    assert view.microphone != "off"
+
+
 def test_writer_rejects_a_transcript_shaped_pair(tmp_path: Path):
     path = tmp_path / "voice-projection.json"
     write_projection(path, state="speaking", microphone="off", generation=4, updated_at=10.0)

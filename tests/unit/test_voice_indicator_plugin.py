@@ -31,6 +31,16 @@ def test_plugin_manifest_is_a_separate_read_only_widget():
     assert "microphone unknown" in source
     assert "voice-projection.json" in source
     assert "voice-status.txt" not in source
+    assert "blockLoading: false" in source
+    assert "blockAllReads: false" in source
+    assert "barForeground" in source
+    assert "Color.foreground" in source
+    assert "Color.urgent" in source
+    assert "NumberAnimation" not in source
+    assert "Behavior on" not in source
+    readme = (PLUGIN / "README.md").read_text(encoding="utf-8")
+    assert "does not stop the voice owner" in readme
+    assert "not a tested" in readme
 
 
 def test_main_install_does_not_enable_the_indicator():
