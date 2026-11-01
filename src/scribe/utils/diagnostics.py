@@ -518,9 +518,10 @@ class SystemDiagnostics:
                 message="OBS is running, but WebSocket is not listening",
                 details=details,
                 fix_suggestion=(
-                    "Run `scribe rec --check`. Scribe will attempt a non-destructive "
-                    "relaunch when recording starts. If the check still fails, close all "
-                    "OBS instances and reopen OBS."
+                    "Run `scribe rec --check`. Scribe will attempt one non-destructive "
+                    "relaunch and will start recording only if that instance accepts "
+                    "a WebSocket stop. If the check still fails, close all OBS "
+                    "instances and reopen OBS."
                 ),
             )
         else:

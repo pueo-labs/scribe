@@ -1796,6 +1796,25 @@ class TestRecordWithWebsocket:
         mock_cli.assert_called_once()
 
     @patch("scribe.core.recorder.obs_reqs")
+    def test_unreachable_running_obs_does_not_start_a_second_recording(self, mock_reqs, recorder):
+        """A live but unreachable OBS process must not enter CLI recording."""
+        mock_reqs.ReqClient.side_effect = ConnectionError("nope")
+
+        with (
+            patch.object(recorder, "_port_listening", return_value=False),
+            patch.object(recorder, "_obs_process_running", return_value=True),
+            patch.object(recorder, "_obs_recording_process_running", return_value=False),
+            patch("scribe.core.recorder.get_obs_executable_path", return_value=None),
+            patch.object(recorder, "_launch_obs") as launch_obs,
+            patch.object(recorder, "_record_with_cli") as mock_cli,
+        ):
+            with pytest.raises(ProcessError, match="connection failed"):
+                recorder._record_with_websocket("test", threading.Event())
+
+        mock_cli.assert_not_called()
+        launch_obs.assert_not_called()
+
+    @patch("scribe.core.recorder.obs_reqs")
     def test_active_recording_connection_error_does_not_fall_back(self, mock_reqs, recorder):
         """An active recording refusal must not attach through CLI fallback."""
         mock_reqs.ReqClient.side_effect = ConnectionError("nope")
@@ -2180,6 +2199,24 @@ class TestWaitForObsStartup:
 
 class TestRecordWithCli:
     """Test _record_with_cli."""
+
+    def test_running_obs_is_not_given_a_second_recording(self, recorder, tmp_path):
+        """CLI mode must not start --startrecording beside an existing process."""
+        recorder.output_folder = tmp_path
+        stop_event = threading.Event()
+
+        with (
+            patch("sys.stdin", Mock(isatty=Mock(return_value=False))),
+            patch("sys.stdout"),
+            patch("scribe.core.recorder.get_obs_executable_path", return_value=tmp_path / "obs"),
+            patch.object(recorder, "_obs_process_running", return_value=True),
+            patch.object(recorder, "_obs_recording_process_running", return_value=False),
+            patch.object(recorder, "_launch_obs") as launch_obs,
+        ):
+            with pytest.raises(ProcessError, match="cannot guarantee a stop"):
+                recorder._record_with_cli("test", stop_event)
+
+        launch_obs.assert_not_called()
 
     def test_stop_event_before_file_found(self, recorder, tmp_path):
         """Stop event set before file detected → ProcessError."""

@@ -158,6 +158,8 @@ jobs:
   coverage:
     name: Coverage (Python 3.14)
     runs-on: ubuntu-latest
+    # apt on a hosted runner has hung until the six-hour default job limit.
+    timeout-minutes: 30
     needs: [lint-and-types]  # Only run if static checks passed
 
     steps:
@@ -180,7 +182,20 @@ jobs:
         # The full tests/ tree (e2e + conversion tests) drives the real Converter,
         # which shells out to ffmpeg. The ubuntu-latest image does not ship it, so
         # install it here; the lighter matrix "Tests" job stays ffmpeg-free.
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        # Each apt command is bounded. A hung Azure mirror must fail this step
+        # instead of occupying the runner until the job timeout.
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if sudo timeout --kill-after=10s 60s apt-get update \
+              && sudo timeout --kill-after=10s 60s apt-get install -y ffmpeg; then
+              exit 0
+            fi
+            echo "apt ffmpeg install failed on attempt ${attempt}"
+            sleep 5
+          done
+          exit 1
 
       - name: Sync environment (dev group)
         run: uv sync --locked --python 3.14 --group dev

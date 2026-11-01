@@ -168,13 +168,17 @@ intended display and audio devices. On macOS, review Screen Recording and
 Microphone permissions. On Windows, verify the expected OBS profile and sources.
 
 If OBS appears in the process list but its configured WebSocket port is closed,
-Scribe attempts one non-destructive multi-instance relaunch before using emergency
-fallback mode. It never terminates an existing OBS process and refuses recovery
-when a recording mux is active. Emergency fallback uses OBS's supported startup
-recording option, verifies that a new media file is growing, and reconnects to
-WebSocket for a safe stop when possible. If WebSocket remains unavailable, stop
-recording in OBS when prompted; Scribe waits for the file to finish instead of
-using an unsupported stop option or moving a live file.
+Scribe attempts one non-destructive multi-instance relaunch. It never terminates
+an existing OBS process and refuses recovery when a recording mux is active.
+Recording starts on the recovery instance only after WebSocket can stop it. If
+that connection does not return, Scribe does not start a second capture. Close
+the unreachable OBS after confirming it is not recording, reopen OBS, and run
+`scribe rec --check`. Emergency fallback, used only when no OBS process is
+already running, uses OBS's supported startup recording option, verifies that a
+new media file is growing, and reconnects to WebSocket for a safe stop when
+possible. If WebSocket remains unavailable, stop recording in OBS when prompted;
+Scribe waits for the file to finish instead of using an unsupported stop option
+or moving a live file.
 
 Scribe reports recording as confirmed only after OBS byte or duration counters
 advance. It separately checks that a media file not present before startup is

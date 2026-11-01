@@ -164,8 +164,9 @@ evidence.
 Recording is a data-preservation workflow. The normal control path requires
 advancing OBS output counters and independently checks for a fresh growing file.
 The emergency path requires file growth before it reports confirmation. Scribe
-never stops or replaces a recording that was already active. If capture ends
-unexpectedly, it preserves the partial file and reports an incomplete session.
+never stops or replaces a recording that was already active. An unreachable OBS
+process is not given a second recording unless WebSocket can stop it. If capture
+ends unexpectedly, it preserves the partial file and reports an incomplete session.
 
 Run `scribe rec --check` before an important meeting. The
 [recording guide](docs/RECORDING.md) explains OBS setup, normal and emergency

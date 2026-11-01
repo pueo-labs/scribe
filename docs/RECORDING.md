@@ -74,8 +74,9 @@ Scribe applies these rules in every mode:
 - A growing media file is never moved or renamed.
 - An unreachable OBS process is never terminated automatically.
 - Recovery is refused when an OBS recording mux process indicates active capture.
-- A stale, unreachable OBS process may trigger one non-destructive second-instance
-  launch using OBS's supported multi-instance and start-recording options.
+- A stale, unreachable OBS process may get one idle second instance. Recording
+  starts only if that instance accepts a WebSocket stop. Scribe does not start
+  a second capture whose only stop would be manual.
 - An unexpected OBS stop preserves the partial file and returns failure.
 - A completed file is renamed only after its size is stable.
 
@@ -88,7 +89,7 @@ successful.
 |---|---|---|
 | WebSocket is available and idle | Starts through WebSocket and requires advancing output counters | Watch OBS meters and the Scribe timer |
 | OBS is already recording | Refuses to interfere and exits with an actionable error | Finish the existing recording manually |
-| OBS process exists but WebSocket is closed | Attempts one non-destructive recovery instance if no recording mux is active | Watch for the new OBS instance and confirmation |
+| OBS process exists but WebSocket is closed | Attempts one idle recovery instance if no recording mux is active. Starts capture only after WebSocket can stop it. Otherwise exits and leaves the process untouched | Close the unreachable OBS after confirming it is not recording, reopen OBS, then retry |
 | OBS executable is found but WebSocket remains unavailable | Uses OBS's supported start option and requires a fresh growing file | Keep OBS visible; stop manually if Scribe cannot reconnect |
 | OBS executable is not found | Waits for a manually started fresh growing file | Open OBS and click Start Recording |
 | Capture stops before a Scribe stop request | Preserves the partial media and reports failure | Inspect the file and OBS log before retrying |

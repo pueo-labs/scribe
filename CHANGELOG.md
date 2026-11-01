@@ -10,6 +10,15 @@ milestones that predate this repository's Git history.
 
 ## [Unreleased]
 
+### Fixed
+
+- An unreachable OBS process no longer leads to a second recording whose only
+  stop is manual. Scribe still attempts one idle relaunch, and it starts
+  capture only when WebSocket can stop that instance.
+- The coverage job bounds `apt-get` while installing ffmpeg. A hung package
+  mirror fails that step in minutes instead of holding the runner until the
+  six-hour job limit.
+
 ## [2.13.2] - 2026-10-31
 
 This patch closes the msgpack and pyasn1 advisories that turned scheduled CI

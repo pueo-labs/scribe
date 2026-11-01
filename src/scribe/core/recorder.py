@@ -307,7 +307,10 @@ class OBSRecorder:
                 )
             raise ProcessError(str(e), context={"phase": self._session.phase.value}) from e
         except ConnectionError as e:
-            if should_fallback_websocket_to_cli(e):
+            # An existing OBS process already had its one idle relaunch. Starting
+            # --startrecording on another instance can leave a capture whose only
+            # stop is a manual request, so that fallback is refused.
+            if should_fallback_websocket_to_cli(e) and not self._obs_process_running():
                 logger.warning("WebSocket connection failed, falling back to CLI mode")
                 return self._record_with_cli(meeting_name, stop_event)
             with suppress(ValueError):
@@ -453,11 +456,13 @@ class OBSRecorder:
         )
 
     def _record_with_cli(self, meeting_name: str, stop_event: threading.Event) -> Path:
-        """Start emergency capture through OBS's supported command-line option.
+        """Start emergency capture only when Scribe can stop it, or the user owns it.
 
-        CLI mode cannot safely stop OBS by command line. Scribe reconnects through
-        WebSocket when possible; otherwise it preserves the active file and asks
-        the user to stop OBS manually before finalization.
+        An OBS process that is already running is left untouched. A second
+        ``--startrecording`` instance has no guaranteed stop. CLI mode can launch
+        OBS only when nothing is running, then reconnect through WebSocket for
+        the stop. If that client never appears, the user stops the capture they
+        can see. Scribe does not terminate OBS.
         """
         from scribe.utils.logging import console
 
@@ -474,20 +479,17 @@ class OBSRecorder:
 
         media_baseline = self._recording_media_snapshot(self.output_folder)
         start_ts = time.time()
+        if obs_running:
+            raise ProcessError(
+                "OBS is already running, but Scribe cannot guarantee a stop for "
+                "another recording instance. That process was left untouched. "
+                "Confirm it is not recording, close it, reopen OBS, and run "
+                "`scribe rec --check`."
+            )
         if obs_exe is not None:
-            if obs_running:
-                console.print(
-                    "[yellow]The existing OBS process is unreachable. Starting a "
-                    "separate recovery instance without interrupting it.[/yellow]"
-                )
-            else:
-                console.print("[cyan]Starting OBS emergency capture...[/cyan]")
+            console.print("[cyan]Starting OBS emergency capture...[/cyan]")
             try:
-                self._launch_obs(
-                    obs_exe,
-                    start_recording=True,
-                    allow_multi=obs_running,
-                )
+                self._launch_obs(obs_exe, start_recording=True, allow_multi=False)
             except OSError as e:
                 raise ProcessError(f"Could not launch OBS emergency capture: {e}") from e
         else:

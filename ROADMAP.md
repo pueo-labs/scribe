@@ -257,9 +257,9 @@ Still required before 2.13.3:
 
 - A clean uninstall and reinstall from the documented tag.
 - The emergency path with an unreachable, non-recording OBS process and a
-  growing file, without adopting another capture. That path can start a second
-  OBS instance, and its stop can fall back to a manual request, so it stays
-  unrun until the stop is guaranteed.
+  growing file, without adopting another capture. Scribe now refuses to start
+  that second recording unless the recovery instance accepts a WebSocket stop.
+  The live run of that recovery, including the guaranteed stop, is still required.
 - Ctrl-C and the recording-duration limit. Typed stop and an external
   unexpected stop are the two control results above. The duration limit's
   minimum is six minutes, so it has not been used for a short proof.
