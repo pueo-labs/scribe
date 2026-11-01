@@ -130,7 +130,7 @@ The optional MLX backend is available through the `mlx` extra:
 
 ```bash
 uv tool install --force --python 3.14 \
-  "scribe[mlx] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[mlx] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 ```
 
 Use only on a supported Apple Silicon host. The project still needs fresh-machine
@@ -146,7 +146,7 @@ The optional whisper.cpp adapter is available through the `whispercpp` extra:
 
 ```bash
 uv tool install --force --python 3.14 \
-  "scribe[whispercpp] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[whispercpp] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 ```
 
 Actual acceleration depends on how the underlying native package was built for

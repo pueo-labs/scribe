@@ -363,6 +363,27 @@ class TestOpenAITranscriber:
         mock_transcribe.assert_called_once()
 
 
+def test_file_default_sends_languages_without_a_text_format(tmp_path):
+    audio = tmp_path / "audio.wav"
+    audio.write_bytes(b"audio")
+    response = type("Speech", (), {"text": "hola", "languages": [{"code": "es"}]})()
+    with (
+        patch("scribe.core.openai_api.OpenAI") as client_class,
+        patch("scribe.core.openai_api.get_audio_duration", return_value=10.0),
+        patch("scribe.core.openai_api.verify_file_content"),
+    ):
+        client_class.return_value.audio.transcriptions.create.return_value = response
+        transcriber = OpenAITranscriber(api_key="sk-test", language="es")
+        transcriber.transcribe_with_server_chunking(audio, tmp_path / "out.txt")
+    request = client_class.return_value.audio.transcriptions.create.call_args.kwargs
+    assert request["model"] == "gpt-transcribe"
+    assert request["languages"] == ["es"]
+    assert "language" not in request
+    assert "response_format" not in request
+    assert transcriber.last_transcript is not None
+    assert transcriber.last_transcript.language == "es"
+
+
 @pytest.mark.parametrize("language", [None, "es", "ja"])
 @pytest.mark.parametrize("model", ["gpt-4o-transcribe", "gpt-4o-transcribe-diarize"])
 def test_explicit_language_reaches_server_and_client_chunks(language, model, tmp_path):

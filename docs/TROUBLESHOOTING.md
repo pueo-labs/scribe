@@ -20,7 +20,7 @@ Install the current GitHub release as a tool:
 
 ```bash
 uv tool install --force --python 3.14 \
-  git+https://github.com/blisspixel/scribe.git@v2.13.1
+  git+https://github.com/pueo-labs/scribe.git@v2.13.1
 uv tool update-shell
 ```
 
@@ -49,7 +49,7 @@ If a cloud-synced home directory prevents hardlinks, reinstall with copy mode:
 
 ```bash
 uv tool install --force --link-mode copy --python 3.14 \
-  git+https://github.com/blisspixel/scribe.git@v2.13.1
+  git+https://github.com/pueo-labs/scribe.git@v2.13.1
 ```
 
 For a development checkout:
@@ -142,10 +142,10 @@ Install the applicable extra from this repository, then run diagnostics:
 
 ```bash
 uv tool install --force --python 3.14 \
-  "scribe[mlx] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[mlx] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 
 uv tool install --force --python 3.14 \
-  "scribe[whispercpp] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[whispercpp] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 ```
 
 MLX is for supported Apple Silicon systems. whisper.cpp support depends on the
@@ -220,7 +220,7 @@ install the token-free Nemotron extra:
 
 ```bash
 uv tool install --force --python 3.14 --torch-backend auto \
-  "scribe[diarize-nemotron] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[diarize-nemotron] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 scribe info
 ```
 
@@ -264,7 +264,7 @@ Install the tray extra and run its check without starting the resident process:
 
 ```bash
 uv tool install --force --python 3.14 \
-  "scribe[tray] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[tray] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 scribe tray --check
 ```
 

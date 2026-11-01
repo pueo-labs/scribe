@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security report
-    url: https://github.com/blisspixel/scribe/security/policy
+    url: https://github.com/pueo-labs/scribe/security/policy
     about: Report privately through the Security tab. Do not disclose details in a public issue.
   - name: Support guidance
-    url: https://github.com/blisspixel/scribe/blob/main/SUPPORT.md
+    url: https://github.com/pueo-labs/scribe/blob/main/SUPPORT.md
     about: Review diagnostics and data-safety guidance before opening an issue.

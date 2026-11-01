@@ -461,6 +461,7 @@ class VoiceTrayService:
         self._cancel_requested = False
         self._mic_announcer: Callable[[bool], None] | None = None
         self._text_inserter: Callable[[str], str] | None = None
+        self._status_generation: int | None = None
 
     @property
     def status_text(self) -> str:
@@ -513,6 +514,39 @@ class VoiceTrayService:
             announcer(active)
         except Exception:
             logger.warning("Microphone announcer failed", exc_info=True)
+
+    def enable_status_projection(self, generation: int) -> None:
+        """Publish the content-free Omarchy status file for this owner."""
+        from scribe.voice.status_projection import validate_generation
+
+        validate_generation(generation)
+        self._status_generation = generation
+        self.publish_status_projection()
+
+    def publish_status_projection(self) -> None:
+        """Refresh the projection. A transcript or error string cannot be written."""
+        generation = self._status_generation
+        if generation is None:
+            return
+        from scribe.voice.status_projection import (
+            fields_from_owner,
+            projection_path,
+            write_projection,
+        )
+
+        with self._state_lock:
+            service_state = self.state
+            stream_open = self._stream is not None
+        state, microphone = fields_from_owner(service_state, stream_open=stream_open)
+        try:
+            write_projection(
+                projection_path(),
+                state=state,
+                microphone=microphone,
+                generation=generation,
+            )
+        except (OSError, ValueError):
+            logger.warning("Could not publish the voice status projection", exc_info=True)
 
     def snapshot(self) -> dict[str, object]:
         """Return a JSON-ready view of resident voice. It does not open the microphone."""
@@ -1374,6 +1408,7 @@ class VoiceTrayService:
                 callback(self.state)
             except Exception:
                 logger.warning("Voice state callback failed", exc_info=True)
+        self.publish_status_projection()
 
     def _set_state(self, state: VoiceTrayState, error: str | None = None) -> None:
         with self._state_lock:

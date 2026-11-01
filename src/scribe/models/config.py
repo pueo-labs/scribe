@@ -230,8 +230,12 @@ class ScribeConfig(BaseSettings):
     )
 
     openai_model: str = Field(
-        default="gpt-4o-transcribe-diarize",
-        description="OpenAI transcription model (with speaker diarization)",
+        default="gpt-transcribe",
+        description=(
+            "OpenAI file-transcription model. The default is gpt-transcribe and "
+            "does not return speaker labels. gpt-4o-transcribe-diarize remains an "
+            "explicit override until 2027-02-26. Env: SCRIBE_OPENAI_MODEL."
+        ),
     )
 
     # OpenRouter settings. These are inert unless --method openrouter (or an

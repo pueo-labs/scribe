@@ -28,7 +28,7 @@ Not supported as product surfaces:
 Use a global uv tool install when you want `scribe` available from any folder:
 
 ```bash
-uv tool install --with "av<19" --torch-backend auto --python 3.14 git+https://github.com/blisspixel/scribe.git@v2.13.1
+uv tool install --with "av<19" --torch-backend auto --python 3.14 git+https://github.com/pueo-labs/scribe.git@v2.13.1
 uv tool update-shell
 scribe init
 scribe info
@@ -57,7 +57,7 @@ It does not download a model or call a transcription API.
 Use a project-local install when developing Scribe:
 
 ```bash
-git clone https://github.com/blisspixel/scribe.git
+git clone https://github.com/pueo-labs/scribe.git
 cd scribe
 uv sync --locked --group dev
 uv run scribe init
@@ -74,7 +74,7 @@ is 3.14, which is inside Scribe's `>=3.11,<3.15` range.
 
 ```bash
 omarchy pkg add uv
-uv tool install --with "av<19" --torch-backend auto --python 3.14 git+https://github.com/blisspixel/scribe.git@v2.13.1
+uv tool install --with "av<19" --torch-backend auto --python 3.14 git+https://github.com/pueo-labs/scribe.git@v2.13.1
 uv tool update-shell
 scribe init
 scribe doctor
@@ -114,7 +114,7 @@ this release was not demonstrated on Omarchy hardware.
 
 ```bash
 uv tool install --with "av<19" --torch-backend auto --force --python 3.14 \
-  "scribe[tray] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[tray] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 scribe voice check
 scribe voice omarchy-install
 ```
@@ -175,13 +175,13 @@ Install tool extras from the Git repository, for example:
 
 ```bash
 uv tool install --with "av<19" --torch-backend auto --force --python 3.14 \
-  "scribe[mlx] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[mlx] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 uv tool install --with "av<19" --torch-backend auto --force --python 3.14 \
-  "scribe[whispercpp] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[whispercpp] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 uv tool install --with "av<19" --force --python 3.14 --torch-backend auto \
-  "scribe[diarize-nemotron] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[diarize-nemotron] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 uv tool install --with "av<19" --torch-backend auto --force --python 3.14 \
-  "scribe[tray] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[tray] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 ```
 
 The current base install includes the PyTorch and faster-whisper stack, so it is

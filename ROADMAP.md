@@ -70,8 +70,9 @@ The detailed version-sync and release workflow is in
 | 2.12.0 | Released | Accuracy-first multilingual file transcription, security updates, and recording, install, storage, and cleanup fixes | 2.11.0 |
 | 2.13.0 | Released | Terminal interface, notes honesty and opt-in source references, current Gemini pins, Python 3.11-3.14, and the aiohttp audit fix | 2.12.0 |
 | 2.13.1 | Released | Close the filelock, virtualenv, and setuptools advisories and require Pillow 13 in package metadata | 2.13.0 |
-| 2.13.2 | Next | Produce clean-machine and real OBS evidence; fix every release-blocking finding | 2.13.1 |
-| 2.14.0 | Planned | Validate desktop recording and resident voice on real hardware, including Omarchy | 2.13.2 evidence gate |
+| 2.13.2 | Next | Close the msgpack and pyasn1 advisories, move OpenAI defaults off announced shutdowns, and add the optional content-free Omarchy status projection | 2.13.1 |
+| 2.13.3 | Planned | Produce clean-machine and real OBS evidence; fix every release-blocking finding | 2.13.2 |
+| 2.14.0 | Planned | Validate desktop recording and resident voice on real hardware, including Omarchy | 2.13.3 evidence gate |
 | 2.15.0 | Planned | Reduce orchestration complexity and deepen failure-path verification | 2.14.0 behavior contract |
 | 3.0.0 | Gated | Redesign dependency extras and interpreter support without weakening local workflows | 2.15.0 boundaries and migration design |
 | 3.1.0 | Conditional | Distribute signed native components only if measured evidence justifies them | 3.0.0 package contract and native decision gate |
@@ -112,16 +113,46 @@ October 24 audit named filelock 3.32.0, virtualenv 21.14.5, and setuptools
 83.0.0. The release locks filelock 4.2.4, virtualenv 21.14.13, and setuptools
 84.2.1, and it requires Pillow 13.0.0 in package metadata. Pillow 13.0.0 was
 already the locked wheel. The partial-exit log fix and the Gemini diagnostic
-redaction ship in the same patch. The unchanged operational-proof scope moves
-from 2.13.1 to 2.13.2. Desktop validation stays 2.14.0 and now depends on
-2.13.2. Issue #66, the optional content-free Omarchy status indicator, stays
-outside this patch and with the 2.14.0 desktop record.
+redaction ship in the same patch. The unchanged operational-proof scope moved
+from 2.13.1 to 2.13.2.
+
+Scheduled CI went red again on 2026-10-28. The audit named msgpack 1.2.1,
+CVE-2026-114613, fixed in 1.2.3. A later pass named pyasn1 0.6.4, fixed in
+0.6.5. 2.13.2 closes both advisories, moves the OpenAI file default to
+`gpt-transcribe`, and adds the optional content-free status projection from
+issue #66. The projection does not claim a live microphone, focus, or recovery
+record. That claim stays with the 2.14.0 desktop record. The unchanged
+operational-proof scope moves from 2.13.2 to 2.13.3. Desktop validation stays
+2.14.0 and now depends on 2.13.3.
 
 Version numbers after 2.13.1 are planning targets. SemVer impact discovered during
 implementation can change a target, but the reason and replacement target must be
 recorded here before release preparation.
 
-## Next release: 2.13.2 operational proof
+## Next release: 2.13.2 dependency and model maintenance
+
+### Objective
+
+Restore a passing dependency audit and stop selecting OpenAI models that have
+an announced shutdown. Ship the optional Omarchy status projection as a
+read-only widget without treating it as desktop hardware evidence.
+
+### Exit criteria
+
+- msgpack 1.2.3 or newer is the locked line, with the floor in the developer
+  group. pyasn1 0.6.5 or newer is the locked line. `pip-audit` reports no
+  known vulnerabilities.
+- New OpenAI file transcription uses `gpt-transcribe`. Forced language uses
+  `languages`. The February 26, 2027 transcription ids and the already shut-down
+  `gpt-4`, `dall-e-3`, and `gpt-image-1` ids follow the curated schedule.
+- The status projection tests show that transcripts, paths, and errors do not
+  enter the plugin file, and a failed read does not say the microphone is off.
+- The Omarchy install script does not enable the widget.
+- Required CI passes on the release commit.
+- Clean-machine and real OBS evidence remain the 2.13.3 gate. A visible
+  indicator is not the 2.14.0 Omarchy voice record.
+
+## Planned release: 2.13.3 operational proof
 
 ### Objective
 
@@ -196,7 +227,7 @@ These observations were made on 2026-10-20 with the published `v2.13.0` tool
 (`f3d000034c342677573fbc1cbc5f47545cd53420`) on one Windows machine. The
 interpreter was Python 3.14.7. The install command was `uv tool install --with
 "av<19" --torch-backend auto --python 3.14` from that tag. This is supporting
-evidence. The 2.13.2 gate remains open until the same checks pass on the exact
+evidence. The 2.13.3 gate remains open until the same checks pass on the exact
 release commit, from a clean install, and on macOS and Omarchy.
 
 Shown on that Windows install:
@@ -229,7 +260,7 @@ Shown on that Windows install:
   one flagged span. The published tool environment had no `scribe_audio_core`
   module, so chunking used the portable duration path. That same run logged its
   own exit as a later session error. That logging defect is fixed in 2.13.1
-  and still needs to be shown on the 2.13.2 candidate.
+  and still needs to be shown on the 2.13.3 candidate.
 - On 2026-10-21, `scribe doctor --live` from this workspace tree exited 0 with
   22 passed checks and 2 warnings. OpenRouter was valid, and no provider hard
   cap at or below the configured $5.00 guard was reported. The guidance names
@@ -244,7 +275,7 @@ Shown on that Windows install:
   recording was preserved. ffprobe reported about 9.9 seconds. The proof media
   was deleted, OBS was left idle, and the previous record directory was restored.
 
-Still required before 2.13.2:
+Still required before 2.13.3:
 
 - A clean uninstall and reinstall from the documented tag.
 - The emergency path with an unreachable, non-recording OBS process and a
@@ -255,7 +286,7 @@ Still required before 2.13.2:
   unexpected stop are the two control results above. The duration limit's
   minimum is six minutes, so it has not been used for a short proof.
 - Request metadata beyond the CLI announcement and the session summary.
-- The Windows checks repeated on the exact 2.13.2 candidate, including
+- The Windows checks repeated on the exact 2.13.3 candidate, including
   `scribe doctor --live` and the unexpected-stop result.
 - macOS and Omarchy clean installs, with OBS evidence. The Omarchy record
   includes a Hyprland PipeWire capture.
@@ -268,10 +299,9 @@ Make the desktop support statement evidence-based across recording and resident
 voice, with tested fallbacks where an operating system cannot provide parity.
 2.11.0 added the experimental `scribe voice` control plane. This release is the
 live record that can promote or further limit that path. Source, CI, and a
-GitHub release do not close it. Issue #66, the optional content-free Omarchy
-status indicator, is a later feature and stays outside 2.13.2. A claim that the
-indicator reflects a live microphone waits for this release's Omarchy voice
-record.
+GitHub release do not close it. Issue #66's content-free projection and
+optional widget ship in 2.13.2. A claim that the indicator reflects a live
+microphone waits for this release's Omarchy voice record.
 
 ### Order of operations
 
@@ -441,7 +471,7 @@ The following work can produce a patch release at any point:
 - Credential exposure, unsafe URL handling, or cloud-boundary regressions.
 - Actionable dependency advisories. The unused WhisperX extra is retired to
   remove the unpatched NLTK dependency tracked in
-  [issue 31](https://github.com/blisspixel/scribe/issues/31); faster-whisper and
+  [issue 31](https://github.com/pueo-labs/scribe/issues/31); faster-whisper and
   Whisper large model support remain part of the base installation.
 - Supported-platform installation failures and standard user-storage layout.
   Linux uses XDG config/data/state/runtime and localized Videos paths, with

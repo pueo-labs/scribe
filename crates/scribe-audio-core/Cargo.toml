@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 authors = ["Nick Seal"]
 license = "Apache-2.0"
-repository = "https://github.com/blisspixel/scribe"
+repository = "https://github.com/pueo-labs/scribe"
 
 [lib]
 name = "scribe_audio_core"

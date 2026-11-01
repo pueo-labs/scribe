@@ -229,6 +229,11 @@ def run_serve(console: Console, *, preload: bool) -> int:
         service.set_text_inserter(_hyprland_inserter())
         if not service.start_session(preload_model=settings.preload_model):
             return 1
+        enable_projection = getattr(service, "enable_status_projection", None)
+        if enable_projection is not None:
+            from scribe.voice.status_projection import new_generation
+
+            enable_projection(new_generation())
         token = secrets.token_urlsafe(32)
         token_path = control_token_path()
         write_token(token_path, token)
@@ -240,8 +245,15 @@ def run_serve(console: Console, *, preload: bool) -> int:
             "[dim]Experimental local voice. The microphone stays off until dictate. "
             "Cloud transcription is not used. Ctrl+C stops this owner.[/dim]"
         )
+        refreshed = time.monotonic()
         while service.running:
             time.sleep(0.25)
+            if time.monotonic() - refreshed < 2.0:
+                continue
+            refreshed = time.monotonic()
+            publish_projection = getattr(service, "publish_status_projection", None)
+            if publish_projection is not None:
+                publish_projection()
         return 0 if service.stop() else 1
     except KeyboardInterrupt:
         if service is None:

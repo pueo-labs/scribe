@@ -621,11 +621,12 @@ def generate_transcript_joke(
 
             # Don't pass OpenAI-specific models to the provider factory
             # Let factory choose default if model is empty or OpenAI-specific
-            openai_models = ["gpt-5", "gpt-5.2", "gpt-5.4", "gpt-5.5", "gpt-4", "gpt-4o", ""]
+            from scribe.providers.openai_models import catalog_model_or_none
+
             provider = get_provider(
                 feature="joke",
                 api_key=None,  # Let factory get the right key for the provider
-                model=cfg.model if cfg.model and cfg.model not in openai_models else None,
+                model=catalog_model_or_none(cfg.model),
                 provider_name=provider_name,
             )
             logger.info(

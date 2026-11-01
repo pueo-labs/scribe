@@ -677,9 +677,10 @@ If you answer NO to any of these, score MUST be below 7.0.
 
             result = provider.analyze_image(image_data, qa_prompt)
         elif hasattr(provider, "chat") and hasattr(provider.chat, "completions"):
-            # Using OpenAI client directly
+            from scribe.providers.openai_models import VISION_MODEL
+
             response = provider.chat.completions.create(
-                model="gpt-4o",  # Use vision model
+                model=VISION_MODEL,
                 messages=[
                     {
                         "role": "user",
@@ -692,7 +693,7 @@ If you answer NO to any of these, score MUST be below 7.0.
                         ],
                     }
                 ],
-                max_tokens=1000,
+                max_completion_tokens=1000,
             )
 
             # Parse response
@@ -913,11 +914,12 @@ def generate_meeting_meme(
         # An explicit key without a provider is the legacy OpenAI Python API.
         legacy_openai = api_key is not None and provider_name is None
         requested_provider = "openai" if legacy_openai else provider_name
-        openai_models = ["gpt-5", "gpt-5.2", "gpt-5.4", "gpt-5.5", "gpt-4", "gpt-4o"]
+        from scribe.providers.openai_models import catalog_model_or_none
+
         provider = get_provider(
             feature="meme",
             api_key=api_key,
-            model=config.model if config.model not in openai_models else None,
+            model=catalog_model_or_none(config.model),
             provider_name=requested_provider,
         )
 
@@ -929,11 +931,7 @@ def generate_meeting_meme(
             api_key=(
                 api_key if legacy_openai and image_provider_name in (None, "openai") else None
             ),
-            model=(
-                config.image_model
-                if config.image_model not in ["gpt-image-2", "dall-e-3"]
-                else None
-            ),
+            model=catalog_model_or_none(config.image_model),
             provider_name=image_provider_name,
         )
 

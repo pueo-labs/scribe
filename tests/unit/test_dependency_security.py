@@ -26,10 +26,15 @@ DIRECT_SECURITY_FLOORS = {
 }
 DEV_SECURITY_FLOORS = {
     "virtualenv": ("21.14.8", "21.14.9"),
+    "msgpack": ("1.2.2", "1.2.3"),
+}
+TRANSITIVE_SECURITY_FLOORS = {
+    "pyasn1": ("0.6.4", "0.6.5"),
 }
 LOCK_SECURITY_FLOORS = {
     **DIRECT_SECURITY_FLOORS,
     **DEV_SECURITY_FLOORS,
+    **TRANSITIVE_SECURITY_FLOORS,
 }
 
 

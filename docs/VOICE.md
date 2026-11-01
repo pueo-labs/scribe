@@ -143,17 +143,23 @@ compose, so Scribe does not take it either.
 one resident `VoiceTrayService`. It does not open a second microphone and it
 does not load a second model. Cloud transcription is not a command on this
 path. The microphone stays off until `scribe voice dictate` or Super+Alt+D.
-Recording state is visible in three places: a red `MICROPHONE ON` banner in
-`scribe voice overlay`, the exact text `MICROPHONE ON` in
+Recording state is visible in the terminal overlay, in
 `$XDG_STATE_HOME/scribe/voice-status.txt` (default
-`~/.local/state/scribe/voice-status.txt`), and a critical notification. Processing, reading,
-and errors say the microphone is off.
+`~/.local/state/scribe/voice-status.txt`), and in a critical notification.
+Those three say `MICROPHONE ON` or that the microphone is off. An optional
+Omarchy bar widget can also read
+`$XDG_STATE_HOME/scribe/voice-projection.json`. That file is content-free:
+state, microphone, generation, and a timestamp. A missing owner, a stale
+file, or a bad read shows `microphone unknown`, which is not proof that the
+microphone is off. The widget is not installed by the Omarchy install script
+and a visible label is not a hardware validation. See
+[the indicator README](../packaging/linux/omarchy/scribe-voice-indicator/README.md).
 
 Install the tray extra, then add only the marked user blocks:
 
 ```bash
 uv tool install --force --python 3.14 \
-  "scribe[tray] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[tray] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 scribe voice check
 scribe voice omarchy-install
 ```

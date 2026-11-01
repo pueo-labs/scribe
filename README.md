@@ -1,6 +1,6 @@
 # Scribe
 
-[![CI](https://github.com/blisspixel/scribe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/blisspixel/scribe/actions/workflows/ci.yml)
+[![CI](https://github.com/pueo-labs/scribe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/pueo-labs/scribe/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.11 through 3.14](https://img.shields.io/badge/python-3.11%20through%203.14-blue.svg)](https://www.python.org/downloads/)
 
@@ -21,7 +21,7 @@ not lift that cap.
 OBS Studio is required only for recording.
 
 ```bash
-uv tool install --with "av<19" --torch-backend auto --python 3.14 git+https://github.com/blisspixel/scribe.git@v2.13.1
+uv tool install --with "av<19" --torch-backend auto --python 3.14 git+https://github.com/pueo-labs/scribe.git@v2.13.1
 uv tool update-shell
 
 scribe init
@@ -54,7 +54,7 @@ is inside Scribe's supported range. Install uv, then pin the tool to Python 3.14
 ```bash
 omarchy pkg add uv
 uv tool install --with "av<19" --torch-backend auto --python 3.14 --force \
-  "scribe[tray] @ git+https://github.com/blisspixel/scribe.git@v2.13.1"
+  "scribe[tray] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
 uv tool update-shell
 scribe init
 scribe doctor
@@ -87,7 +87,10 @@ read run only when asked. Insert pastes through Hyprland, not `wtype`. Cloud
 transcription is not available on this command. `scribe voice check` does not
 open the microphone. A successful check is not a tested Omarchy installation:
 microphone selection, focus changes, correct-target insertion, cancellation,
-device loss, and recovery have not been demonstrated on Omarchy hardware. The
+device loss, and recovery have not been demonstrated on Omarchy hardware. An
+optional bar widget can show the same microphone words from a content-free
+status file. The install script does not enable it, and a visible label is
+not that hardware record. The
 [deployment guide](docs/DEPLOYMENT.md#omarchy) has the install and removal steps.
 
 For other setup variants, optional backends, upgrades, and recovery, see the

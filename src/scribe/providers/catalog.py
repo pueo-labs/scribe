@@ -5,16 +5,17 @@ health probes both depend on it, so keeping the catalog separate prevents those
 two services from importing each other.
 """
 
+from scribe.providers.openai_models import IMAGE_MODEL, TRANSCRIBE_MODEL
 from scribe.utils.ollama_models import DEFAULT_OLLAMA_MODEL
 
 _DEFAULT_MODELS: dict[str, dict[str, str | None]] = {
     "openai": {
         "joke": "gpt-5.5",
         "meme": "gpt-5.5",
-        "meme_image": "gpt-image-2",
+        "meme_image": IMAGE_MODEL,
         "notes": "gpt-5.5",
         "speakers": "gpt-5.5",
-        "transcribe": "whisper-1",
+        "transcribe": TRANSCRIBE_MODEL,
     },
     # OpenRouter's OpenAI-compatible chat endpoint; used for text features only.
     "openrouter": {

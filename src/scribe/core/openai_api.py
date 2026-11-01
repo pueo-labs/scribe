@@ -30,6 +30,11 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeEl
 
 from scribe.exceptions import APIError, CircuitBreakerOpen, TranscriptionError
 from scribe.models.transcript import Transcript, TranscriptSegment
+from scribe.providers.openai_models import (
+    TRANSCRIBE_MODEL,
+    RetiredModelError,
+    audio_transcription_fields,
+)
 from scribe.utils.api_resilience import (
     ensure_api_circuit_closed,
     record_api_failure,
@@ -99,7 +104,7 @@ class OpenAITranscriber:
     def __init__(
         self,
         api_key: str,
-        model: str = "gpt-4o-transcribe",
+        model: str = TRANSCRIBE_MODEL,
         use_server_chunking: bool = True,
         *,
         language: str | None = None,
@@ -109,7 +114,7 @@ class OpenAITranscriber:
 
         Args:
             api_key: OpenAI API key
-            model: Model to use (default: gpt-4o-transcribe)
+            model: Model to use (default: gpt-transcribe)
             use_server_chunking: Use OpenAI's server-side chunking (recommended)
         """
         self.api_key = api_key
@@ -146,27 +151,15 @@ class OpenAITranscriber:
             with open(audio_path, "rb") as audio_file:
                 logger.info(f"Uploading to OpenAI ({self.model})...")
 
-                # Build params according to OpenAI docs
-                params = {
-                    "model": self.model,
-                    "file": audio_file,
-                }
-
-                if self.language is not None:
-                    params["language"] = self.language
-
-                # Configure response format based on model
-                if "diarize" in self.model:
-                    # Speaker labels only come back as diarized_json. The diarize model
-                    # rejects prompts and timestamp_granularities, and requires a
-                    # chunking_strategy for audio longer than 30 seconds.
-                    params["response_format"] = "diarized_json"
-                    params["chunking_strategy"] = "auto"
-                else:
-                    params["response_format"] = "text"
-                    # Add prompt if provided (not supported for diarize models)
-                    if prompt:
-                        params["prompt"] = prompt
+                params: dict[str, Any] = {"model": self.model, "file": audio_file}
+                params.update(
+                    audio_transcription_fields(
+                        self.model,
+                        language=self.language,
+                        prompt=prompt,
+                        include_chunking=True,
+                    )
+                )
 
                 try:
                     transcript_response = cast(Any, self.client.audio.transcriptions).create(
@@ -208,6 +201,11 @@ class OpenAITranscriber:
 
             return output_path
 
+        except RetiredModelError as e:
+            raise TranscriptionError(
+                str(e),
+                context={"audio_file": audio_path.name, "model": self.model},
+            ) from e
         except AuthenticationError as e:
             raise APIError(
                 "OpenAI API authentication failed",
@@ -300,6 +298,8 @@ class OpenAITranscriber:
             duration = float(raw_duration)
 
         returned_language = getattr(response, "language", None)
+        if not isinstance(returned_language, str) or not returned_language:
+            returned_language = _language_code(getattr(response, "languages", None))
         language = returned_language if isinstance(returned_language, str) else self.language
         language_metadata = {
             "language_mode": "forced" if self.language is not None else "provider automatic",
@@ -633,12 +633,15 @@ class OpenAITranscriber:
             try:
                 ensure_api_circuit_closed()
                 with open(chunk_path, "rb") as f:
-                    kwargs = {"model": self.model, "file": f, "response_format": "text"}
-
-                    if self.language is not None:
-                        kwargs["language"] = self.language
-                    if prompt:
-                        kwargs["prompt"] = prompt
+                    kwargs: dict[str, Any] = {"model": self.model, "file": f}
+                    kwargs.update(
+                        audio_transcription_fields(
+                            self.model,
+                            language=self.language,
+                            prompt=prompt,
+                            include_chunking=False,
+                        )
+                    )
 
                     response = cast(Any, self.client.audio.transcriptions).create(**kwargs)
 
@@ -849,10 +852,22 @@ class OpenAITranscriber:
                         logger.warning(f"Could not delete {temp_file.name}: {e}")
 
 
+def _language_code(languages: object) -> str | None:
+    """Return the first language code from a gpt-transcribe languages array."""
+    if not isinstance(languages, list) or not languages:
+        return None
+    first = languages[0]
+    if isinstance(first, dict):
+        code = first.get("code")
+    else:
+        code = getattr(first, "code", None)
+    return code if isinstance(code, str) and code else None
+
+
 def transcribe_with_openai(
     audio_path: Path,
     api_key: str,
-    model: str = "gpt-4o-transcribe",
+    model: str = TRANSCRIBE_MODEL,
     **kwargs: Any,
 ) -> Path:
     """

@@ -39,7 +39,7 @@ class TestProviderFactory:
         assert _get_default_model("openai", "notes") == "gpt-5.5"
         assert _get_default_model("openai", "meme") == "gpt-5.5"
         assert _get_default_model("openai", "meme_image") == "gpt-image-2"
-        assert _get_default_model("openai", "transcribe") == "whisper-1"
+        assert _get_default_model("openai", "transcribe") == "gpt-transcribe"
 
     def test_get_default_model_xai(self):
         """Test getting default XAI models."""
@@ -166,13 +166,12 @@ class TestOpenAIProvider:
 
     @patch("scribe.providers.openai_provider.OpenAI")
     def test_generate_image_url_fallback(self, mock_openai_class):
-        """Test image generation with URL fallback (dall-e-3 behavior)."""
+        """A URL response is downloaded when the image payload has no bytes."""
         config = ProviderConfig(provider_name="openai", api_key="test-key", model="gpt-5")
 
         mock_client = Mock()
         mock_openai_class.return_value = mock_client
 
-        # Test with URL (dall-e-3 behavior)
         mock_response = Mock()
         mock_response.data = [Mock(b64_json=None, url="https://example.com/image.png")]
         mock_client.images.generate.return_value = mock_response
@@ -182,9 +181,17 @@ class TestOpenAIProvider:
             return_value=b"fake_image_data",
         ):
             provider = OpenAIProvider(config)
-            result = provider.generate_image(prompt="Test image", model="dall-e-3")
+            result = provider.generate_image(prompt="Test image", model="gpt-image-2")
 
             assert result == b"fake_image_data"
+
+    @patch("scribe.providers.openai_provider.OpenAI")
+    def test_retired_image_model_is_refused(self, mock_openai_class):
+        config = ProviderConfig(provider_name="openai", api_key="test-key", model="gpt-image-2")
+        mock_openai_class.return_value = Mock()
+        provider = OpenAIProvider(config)
+        with pytest.raises(ValueError, match="gpt-image-2"):
+            provider.generate_image(prompt="Test image", model="dall-e-3")
 
 
 class TestXAIProvider:

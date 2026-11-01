@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "org.pueolabs.scribe-voice",
+  "name": "Scribe Voice",
+  "version": "1.0.0",
+  "author": "Nick Seal",
+  "license": "Apache-2.0",
+  "description": "Read-only microphone state for the resident Scribe voice owner. It does not capture audio.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Scribe Voice",
+    "description": "Shows MICROPHONE ON or microphone unknown from a content-free status file.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

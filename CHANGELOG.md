@@ -10,12 +10,43 @@ milestones that predate this repository's Git history.
 
 ## [Unreleased]
 
+### Security
+
+- Locked msgpack 1.2.4 replaces 1.2.1. The patched line starts at 1.2.3 and
+  closes CVE-2026-114613, a memory leak and stale-reference bug in the msgpack
+  C extension when a map key is rejected. cachecontrol still allows the older
+  line, so the floor is direct.
+- Locked pyasn1 0.6.5 replaces 0.6.4. That release closes CVE-2026-119194,
+  CVE-2026-119195, CVE-2026-119196, and CVE-2026-119197. CVE-2026-119196 is
+  quadratic CPU use while decoding a constructed BIT STRING.
+
+### Fixed
+
+- OpenAI file transcription defaults to `gpt-transcribe`. A forced language is
+  sent as `languages`, because that model rejects a sibling `language` field.
+  `gpt-4o-transcribe-diarize` and `whisper-1` remain explicit overrides until
+  2027-02-26 and then fail with the replacement name. `gpt-4`, `dall-e-3`, and
+  `gpt-image-1` are refused. Meme vision no longer calls `gpt-4o`.
+- `scribe doctor --live` warns when the configured OpenAI model has a
+  `shutdown_date` on `GET /v1/models`, or a curated shutdown date. The result
+  does not include the API key.
+
 ### Added
 
 - `AGENTS.md` tells sessions to finish or park leftover branches, worktrees,
   and pull requests before starting a parallel attempt, and to remove a
   worktree or branch only when its work is merged, contained in main, or
   pushed.
+- An optional Omarchy bar widget reads a content-free voice projection. The
+  install script does not enable it. A fresh `idle`/`off` projection can say
+  the microphone is off. A missing, stale, or malformed read says
+  `microphone unknown` and is not that proof. This does not close the Omarchy
+  hardware record.
+
+### Changed
+
+- Install and documentation links use `pueo-labs/scribe`. GitHub still redirects
+  the previous `blisspixel/scribe` URL.
 
 ## [2.13.1] - 2026-10-24
 

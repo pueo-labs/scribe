@@ -100,7 +100,7 @@ Current signature:
 ```python
 OpenAITranscriber(
     api_key: str,
-    model: str = "gpt-4o-transcribe",
+    model: str = "gpt-transcribe",
     use_server_chunking: bool = True,
 )
 OpenAITranscriber.transcribe(

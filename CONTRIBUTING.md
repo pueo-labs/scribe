@@ -33,7 +33,7 @@ syntax floor. mypy targets 3.12 so it can read NumPy 2.5 stubs. The 3.11 job
 compileall-checks `src/scribe`.
 
 ```bash
-git clone https://github.com/blisspixel/scribe.git
+git clone https://github.com/pueo-labs/scribe.git
 cd scribe
 uv sync --locked --python 3.14 --group dev
 uv run pre-commit install --install-hooks

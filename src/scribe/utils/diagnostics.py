@@ -710,14 +710,32 @@ class SystemDiagnostics:
 
         # Live validation - actually call the API to verify the key works
         try:
+            from scribe.providers.openai_models import TRANSCRIBE_MODEL, notice_for_configured_model
+
             client = OpenAI(api_key=api_key, timeout=10)
-            client.models.list()
+            page = client.models.list()
             result = DiagnosticResult(
                 name="OpenAI API Key",
                 status="pass",
                 message="Valid",
                 details="An OpenAI API key is configured and valid.",
             )
+            configured = TRANSCRIBE_MODEL
+            if self.config is not None:
+                configured_model = getattr(self.config, "openai_model", None)
+                if isinstance(configured_model, str) and configured_model:
+                    configured = configured_model
+            notice = notice_for_configured_model(configured, page)
+            if notice is not None:
+                self.results.append(
+                    DiagnosticResult(
+                        name="OpenAI model lifecycle",
+                        status="fail" if notice.retired else "warn",
+                        message=configured,
+                        details=notice.message,
+                        fix_suggestion=f"Set SCRIBE_OPENAI_MODEL={notice.replacement}",
+                    )
+                )
         except AuthenticationError:
             result = DiagnosticResult(
                 name="OpenAI API Key",

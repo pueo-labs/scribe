@@ -8,6 +8,13 @@ from typing import Any, cast
 from openai import OpenAI
 
 from scribe.providers.base import AIProvider, ProviderConfig
+from scribe.providers.openai_models import (
+    IMAGE_MODEL,
+    TRANSCRIBE_MODEL,
+    VISION_MODEL,
+    audio_transcription_fields,
+    ensure_usable,
+)
 from scribe.utils.network import download_public_image
 
 
@@ -36,20 +43,19 @@ class OpenAIProvider(AIProvider):
             "model": self.config.model,
             "messages": messages,
         }
-
-        # Handle GPT-5 vs GPT-4 parameter differences
-        if "gpt-5" in self.config.model.lower():
+        params.update(kwargs)
+        family = str(params["model"]).lower()
+        # GPT-5 and GPT-6 reject max_tokens and custom temperature.
+        if "gpt-5" in family or "gpt-6" in family:
+            params.pop("max_tokens", None)
+            params.pop("temperature", None)
             if max_tokens:
                 params["max_completion_tokens"] = max_tokens
-            # GPT-5 doesn't support custom temperature
         else:
             if max_tokens:
                 params["max_tokens"] = max_tokens
             if temperature is not None:
                 params["temperature"] = temperature
-
-        # Add any additional kwargs
-        params.update(kwargs)
 
         response = cast(Any, self.client.chat.completions).create(**params)
 
@@ -70,40 +76,38 @@ class OpenAIProvider(AIProvider):
         }
 
     def transcribe_audio(self, audio_path: str, language: str | None = None, **kwargs: Any) -> str:
-        """Transcribe audio using OpenAI Whisper."""
+        """Transcribe audio with the current OpenAI file model."""
+        model = str(kwargs.pop("model", None) or self.config.model or TRANSCRIBE_MODEL)
+        prompt = kwargs.pop("prompt", None)
+        prompt_text = prompt if isinstance(prompt, str) else None
 
         with open(audio_path, "rb") as audio_file:
-            params: dict[str, Any] = {
-                "model": "whisper-1",
-                "file": audio_file,
-            }
-
-            if language:
-                params["language"] = language
-
+            params: dict[str, Any] = {"model": model, "file": audio_file}
+            params.update(
+                audio_transcription_fields(
+                    model,
+                    language=language,
+                    prompt=prompt_text,
+                    include_chunking=False,
+                )
+            )
             params.update(kwargs)
 
             transcript = cast(Any, self.client.audio.transcriptions).create(**params)
             return str(getattr(transcript, "text", ""))
 
     def generate_image(self, prompt: str, size: str = "1024x1024", **kwargs: Any) -> bytes:
-        """Generate an image using GPT Image 2 (or DALL-E when requested)."""
-        import base64
+        """Generate an image with GPT Image."""
+        model = kwargs.get("model", IMAGE_MODEL)
+        ensure_usable(str(model))
 
-        # Use GPT Image 2 by default.
-        # Falls back to dall-e-3 if model is explicitly specified
-        model = kwargs.get("model", "gpt-image-2")
-
-        # GPT Image models use different quality values than DALL-E.
         quality = kwargs.get("quality", "standard")
         if str(model).startswith("gpt-image-"):
-            # GPT Image uses: low, medium, high, auto
             if quality == "hd":
                 quality = "high"
             elif quality == "standard":
                 quality = "auto"
         else:
-            # dall-e-3 uses: standard, hd
             if quality in ["low", "medium"]:
                 quality = "standard"
             elif quality == "high":
@@ -117,7 +121,6 @@ class OpenAIProvider(AIProvider):
             n=1,
         )
 
-        # GPT Image returns base64, while DALL-E can return a URL.
         data = response.data or []
         if not data:
             raise ValueError("OpenAI image generation returned no data")
@@ -126,15 +129,13 @@ class OpenAIProvider(AIProvider):
         b64_json = getattr(first_image, "b64_json", None)
         if b64_json:
             return base64.b64decode(b64_json)
-        else:
-            # Download from URL (dall-e-3)
-            image_url = getattr(first_image, "url", None)
-            if not image_url:
-                raise ValueError("OpenAI image generation returned no image URL")
-            return download_public_image(image_url)
+        image_url = getattr(first_image, "url", None)
+        if not image_url:
+            raise ValueError("OpenAI image generation returned no image URL")
+        return download_public_image(image_url)
 
     def analyze_image(self, image_data: bytes, prompt: str, **kwargs: Any) -> str:
-        """Analyze an image using GPT-4 Vision."""
+        """Analyze an image. A retired or GPT-4o vision id uses the current default."""
 
         # Encode image to base64
         image_b64 = base64.b64encode(image_data).decode("utf-8")
@@ -152,5 +153,15 @@ class OpenAIProvider(AIProvider):
             }
         ]
 
+        replaced_vision = {
+            "gpt-4",
+            "gpt-4-0613",
+            "gpt-4-turbo",
+            "gpt-4o",
+            "gpt-4o-2024-08-06",
+            "gpt-4o-2024-11-20",
+        }
+        if "model" not in kwargs and self.config.model in replaced_vision:
+            kwargs = {**kwargs, "model": VISION_MODEL}
         response = self.chat_completion(messages, **kwargs)
         return str(response["content"])

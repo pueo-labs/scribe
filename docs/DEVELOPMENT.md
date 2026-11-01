@@ -20,7 +20,7 @@ Python 3.14 is the default runtime. CI also runs the unit suite on Python 3.11,
 ## Setup
 
 ```bash
-git clone https://github.com/blisspixel/scribe.git
+git clone https://github.com/pueo-labs/scribe.git
 cd scribe
 uv sync --locked --python 3.14 --group dev
 uv run pre-commit install --install-hooks

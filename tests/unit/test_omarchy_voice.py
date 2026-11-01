@@ -534,6 +534,83 @@ def test_run_serve_stops_when_startup_fails(monkeypatch: pytest.MonkeyPatch) -> 
     assert run_serve(Console(), preload=False) == 1
 
 
+def test_run_serve_refreshes_the_content_free_projection(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    clock = {"now": 0.0}
+
+    class Lock:
+        def acquire(self) -> bool:
+            return True
+
+        def retain_until_process_exit(self) -> None:
+            return None
+
+    class Service:
+        def __init__(self, _settings: object, _console: object, *, explicit_insert: bool) -> None:
+            assert explicit_insert is True
+            self.running = True
+            self.generation: int | None = None
+            self.published = 0
+
+        def set_mic_announcer(self, _fn: object) -> None:
+            return None
+
+        def set_text_inserter(self, _fn: object) -> None:
+            return None
+
+        def start_session(self, *, preload_model: bool) -> bool:
+            _ = preload_model
+            return True
+
+        def enable_status_projection(self, generation: int) -> None:
+            assert isinstance(generation, int)
+            assert 1 <= generation <= 9_007_199_254_740_991
+            self.generation = generation
+
+        def publish_status_projection(self) -> None:
+            self.published += 1
+            self.running = False
+
+        def stop(self) -> bool:
+            self.running = False
+            return True
+
+    service_holder: list[Service] = []
+
+    def construct(*args: object, **kwargs: object) -> Service:
+        service = Service(*args, **kwargs)
+        service_holder.append(service)
+        return service
+
+    def sleep(_seconds: float) -> None:
+        clock["now"] += 0.25
+
+    monkeypatch.setattr(voice_session.time, "monotonic", lambda: clock["now"])
+    monkeypatch.setattr(voice_session.time, "sleep", sleep)
+    monkeypatch.setattr("scribe.voice.instance.TrayInstanceLock", lambda: Lock())
+    monkeypatch.setattr("scribe.voice.tray._configure_resident_logging", lambda _console: None)
+    monkeypatch.setattr(
+        "scribe.voice.settings.resolve_tray_settings",
+        lambda **_kwargs: SimpleNamespace(preload_model=False),
+    )
+    monkeypatch.setattr("scribe.voice.service.VoiceTrayService", construct)
+    monkeypatch.setattr(voice_session, "_hyprland_inserter", lambda: lambda _text: "copied")
+    token_path = tmp_path / "voice-control.token"
+    monkeypatch.setattr("scribe.voice.control.control_token_path", lambda: token_path)
+    monkeypatch.setattr(
+        "scribe.voice.control.write_token",
+        lambda path, token: path.write_text(token, encoding="utf-8"),
+    )
+    monkeypatch.setattr(
+        "scribe.voice.control.ControlServer",
+        lambda *_args, **_kwargs: SimpleNamespace(start=lambda: None, close=lambda: None),
+    )
+    assert run_serve(Console(), preload=False) == 0
+    assert service_holder[0].generation is not None
+    assert service_holder[0].published == 1
+
+
 def test_run_serve_listens_until_the_service_stops(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
