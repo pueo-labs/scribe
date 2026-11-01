@@ -4,11 +4,19 @@ All notable changes to Scribe are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Version 2.13.1 is the current GitHub release. Version 2.8.1 was the first. Scribe
+Version 2.13.2 is the current GitHub release. Version 2.8.1 was the first. Scribe
 is not published on PyPI. Older versioned sections describe development
 milestones that predate this repository's Git history.
 
 ## [Unreleased]
+
+## [2.13.2] - 2026-10-31
+
+This patch closes the msgpack and pyasn1 advisories that turned scheduled CI
+red, moves OpenAI defaults off announced shutdowns, and adds an optional
+content-free Omarchy status projection. Operational proof remains planned for
+2.13.3. It does not claim a clean-machine install, a real OBS recording, or
+desktop hardware validation. The projection is not that hardware record.
 
 ### Security
 

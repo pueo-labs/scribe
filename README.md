@@ -21,7 +21,7 @@ not lift that cap.
 OBS Studio is required only for recording.
 
 ```bash
-uv tool install --with "av<19" --torch-backend auto --python 3.14 git+https://github.com/pueo-labs/scribe.git@v2.13.1
+uv tool install --with "av<19" --torch-backend auto --python 3.14 git+https://github.com/pueo-labs/scribe.git@v2.13.2
 uv tool update-shell
 
 scribe init
@@ -54,7 +54,7 @@ is inside Scribe's supported range. Install uv, then pin the tool to Python 3.14
 ```bash
 omarchy pkg add uv
 uv tool install --with "av<19" --torch-backend auto --python 3.14 --force \
-  "scribe[tray] @ git+https://github.com/pueo-labs/scribe.git@v2.13.1"
+  "scribe[tray] @ git+https://github.com/pueo-labs/scribe.git@v2.13.2"
 uv tool update-shell
 scribe init
 scribe doctor
@@ -286,7 +286,7 @@ diagnostic bundle for review before sharing.
 
 ## Project status
 
-Version 2.13.1 is the current GitHub release. It is not published on PyPI.
+Version 2.13.2 is the current GitHub release. It is not published on PyPI.
 Linux compositor voice is experimental and is not a tested Omarchy installation.
 CI
 enforces Ruff, strict mypy, an 81 percent combined

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scribe"
-version = "2.13.1"
+version = "2.13.2"
 description = "Local-first speech transcription, meeting notes, and recording tools"
 readme = "README.md"
 # The cap stays until CTranslate2 and ONNX Runtime publish cp315 wheels.

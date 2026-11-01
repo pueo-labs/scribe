@@ -6,7 +6,7 @@ roadmap records only unfinished work and the evidence required to ship it.
 
 ## Current position
 
-Version 2.13.1 is the current GitHub release. The source repository is public.
+Version 2.13.2 is the current GitHub release. The source repository is public.
 The supported package remains the versioned GitHub wheel and
 source distribution. Scribe is not published on PyPI, and no native executable is
 an official release artifact.
@@ -70,8 +70,8 @@ The detailed version-sync and release workflow is in
 | 2.12.0 | Released | Accuracy-first multilingual file transcription, security updates, and recording, install, storage, and cleanup fixes | 2.11.0 |
 | 2.13.0 | Released | Terminal interface, notes honesty and opt-in source references, current Gemini pins, Python 3.11-3.14, and the aiohttp audit fix | 2.12.0 |
 | 2.13.1 | Released | Close the filelock, virtualenv, and setuptools advisories and require Pillow 13 in package metadata | 2.13.0 |
-| 2.13.2 | Next | Close the msgpack and pyasn1 advisories, move OpenAI defaults off announced shutdowns, and add the optional content-free Omarchy status projection | 2.13.1 |
-| 2.13.3 | Planned | Produce clean-machine and real OBS evidence; fix every release-blocking finding | 2.13.2 |
+| 2.13.2 | Released | Close the msgpack and pyasn1 advisories, move OpenAI defaults off announced shutdowns, and add the optional content-free Omarchy status projection | 2.13.1 |
+| 2.13.3 | Next | Produce clean-machine and real OBS evidence; fix every release-blocking finding | 2.13.2 |
 | 2.14.0 | Planned | Validate desktop recording and resident voice on real hardware, including Omarchy | 2.13.3 evidence gate |
 | 2.15.0 | Planned | Reduce orchestration complexity and deepen failure-path verification | 2.14.0 behavior contract |
 | 3.0.0 | Gated | Redesign dependency extras and interpreter support without weakening local workflows | 2.15.0 boundaries and migration design |
@@ -116,43 +116,21 @@ already the locked wheel. The partial-exit log fix and the Gemini diagnostic
 redaction ship in the same patch. The unchanged operational-proof scope moved
 from 2.13.1 to 2.13.2.
 
-Scheduled CI went red again on 2026-10-28. The audit named msgpack 1.2.1,
-CVE-2026-114613, fixed in 1.2.3. A later pass named pyasn1 0.6.4, fixed in
-0.6.5. 2.13.2 closes both advisories, moves the OpenAI file default to
-`gpt-transcribe`, and adds the optional content-free status projection from
-issue #66. The projection does not claim a live microphone, focus, or recovery
-record. That claim stays with the 2.14.0 desktop record. The unchanged
-operational-proof scope moves from 2.13.2 to 2.13.3. Desktop validation stays
-2.14.0 and now depends on 2.13.3.
+2.13.2 then shipped ahead of that proof because scheduled CI was red again.
+The October 28 audit named msgpack 1.2.1, CVE-2026-114613, fixed in 1.2.3.
+A later pass named pyasn1 0.6.4, fixed in 0.6.5. The release locks msgpack
+1.2.4 and pyasn1 0.6.5, moves the OpenAI file default to `gpt-transcribe`,
+and adds the optional content-free status projection from issue #66. The
+projection does not claim a live microphone, focus, or recovery record.
+That claim stays with the 2.14.0 desktop record. The unchanged
+operational-proof scope moved from 2.13.2 to 2.13.3. Desktop validation
+stays 2.14.0 and depends on 2.13.3.
 
-Version numbers after 2.13.1 are planning targets. SemVer impact discovered during
+Version numbers after 2.13.2 are planning targets. SemVer impact discovered during
 implementation can change a target, but the reason and replacement target must be
 recorded here before release preparation.
 
-## Next release: 2.13.2 dependency and model maintenance
-
-### Objective
-
-Restore a passing dependency audit and stop selecting OpenAI models that have
-an announced shutdown. Ship the optional Omarchy status projection as a
-read-only widget without treating it as desktop hardware evidence.
-
-### Exit criteria
-
-- msgpack 1.2.3 or newer is the locked line, with the floor in the developer
-  group. pyasn1 0.6.5 or newer is the locked line. `pip-audit` reports no
-  known vulnerabilities.
-- New OpenAI file transcription uses `gpt-transcribe`. Forced language uses
-  `languages`. The February 26, 2027 transcription ids and the already shut-down
-  `gpt-4`, `dall-e-3`, and `gpt-image-1` ids follow the curated schedule.
-- The status projection tests show that transcripts, paths, and errors do not
-  enter the plugin file, and a failed read does not say the microphone is off.
-- The Omarchy install script does not enable the widget.
-- Required CI passes on the release commit.
-- Clean-machine and real OBS evidence remain the 2.13.3 gate. A visible
-  indicator is not the 2.14.0 Omarchy voice record.
-
-## Planned release: 2.13.3 operational proof
+## Next release: 2.13.3 operational proof
 
 ### Objective
 
@@ -300,7 +278,7 @@ voice, with tested fallbacks where an operating system cannot provide parity.
 2.11.0 added the experimental `scribe voice` control plane. This release is the
 live record that can promote or further limit that path. Source, CI, and a
 GitHub release do not close it. Issue #66's content-free projection and
-optional widget ship in 2.13.2. A claim that the indicator reflects a live
+optional widget shipped in 2.13.2. A claim that the indicator reflects a live
 microphone waits for this release's Omarchy voice record.
 
 ### Order of operations
