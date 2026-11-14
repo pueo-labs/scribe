@@ -11,6 +11,7 @@ import pytest
 
 from scribe.providers.base import ProviderConfig
 from scribe.providers.factory import _get_default_model, get_provider
+from scribe.providers.openai_models import CHAT_MODEL, IMAGE_MODEL, TRANSCRIBE_MODEL
 from scribe.providers.openai_provider import OpenAIProvider
 from scribe.providers.xai_provider import XAIProvider
 
@@ -35,11 +36,11 @@ class TestProviderFactory:
 
     def test_get_default_model_openai(self):
         """Test getting default OpenAI models."""
-        assert _get_default_model("openai", "joke") == "gpt-5.5"
-        assert _get_default_model("openai", "notes") == "gpt-5.5"
-        assert _get_default_model("openai", "meme") == "gpt-5.5"
-        assert _get_default_model("openai", "meme_image") == "gpt-image-2"
-        assert _get_default_model("openai", "transcribe") == "gpt-transcribe"
+        assert _get_default_model("openai", "joke") == CHAT_MODEL
+        assert _get_default_model("openai", "notes") == CHAT_MODEL
+        assert _get_default_model("openai", "meme") == CHAT_MODEL
+        assert _get_default_model("openai", "meme_image") == IMAGE_MODEL
+        assert _get_default_model("openai", "transcribe") == TRANSCRIBE_MODEL
 
     def test_get_default_model_xai(self):
         """Test getting default XAI models."""
@@ -190,7 +191,7 @@ class TestOpenAIProvider:
         config = ProviderConfig(provider_name="openai", api_key="test-key", model="gpt-image-2")
         mock_openai_class.return_value = Mock()
         provider = OpenAIProvider(config)
-        with pytest.raises(ValueError, match="gpt-image-2"):
+        with pytest.raises(ValueError, match="sunburst"):
             provider.generate_image(prompt="Test image", model="dall-e-3")
 
 

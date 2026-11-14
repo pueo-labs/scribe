@@ -1,11 +1,10 @@
 # scribe/utils/joke_generator.py
 
 """
-Agentic AI Humor Generation for Meeting Transcripts (text-only, GPT-5 + Responses API)
+Humor generation for meeting transcripts (text only).
 
 - Text transcripts only: sends transcript inline (no file uploads)
-- Uses OpenAI Responses API with GPT-5
-- Accepts API key as raw string (backward CLI compat) or HumorConfig
+- Accepts an API key as a raw string (backward CLI compat) or HumorConfig
 - Safety: focus humor on concepts/processes; avoid individuals/protected groups
 - Robustness: exponential backoff; auto-ramp max_output_tokens on truncation; single refinement for length
 - Determinism: seedable archetype selection; optional archetype override
@@ -31,6 +30,7 @@ from typing import Any, cast
 from dotenv import find_dotenv, load_dotenv
 from openai import AuthenticationError, OpenAI
 
+from scribe.providers.openai_models import CHAT_MODEL
 from scribe.utils.transcript_loader import load_transcript_text
 
 # -----------------------------------------------------------------------------
@@ -116,11 +116,11 @@ COMEDY_STYLES: dict[str, str] = {
 # -----------------------------------------------------------------------------
 @dataclass
 class HumorConfig:
-    model: str = "gpt-5.5"  # Default model for joke generation
+    model: str = CHAT_MODEL
     spice_level: int = 5  # Humor intensity 0-10 (0=off, 5=default, 10=spicy)
     min_words: int = 10
     max_words: int = 18
-    # Start higher to avoid "max_output_tokens" incomplete results with GPT-5 reasoning
+    # Start higher to avoid incomplete results when the model spends tokens on reasoning
     max_output_tokens: int = 160
     reasoning_effort: str = "low"  # none | low | medium | high | xhigh
     verbosity: str = "low"  # low | medium | high

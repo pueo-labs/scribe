@@ -71,7 +71,7 @@ Each provider is configured with a ProviderConfig dataclass:
 config = ProviderConfig(
     provider_name="openai",
     api_key="sk-...",
-    model="gpt-4",
+    model="gpt-6.1-sol",
     base_url=None,  # Optional custom endpoint
     timeout=120,    # Request timeout in seconds
     max_retries=3   # Retry failed requests

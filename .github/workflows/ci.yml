@@ -23,6 +23,11 @@ env:
   XAI_API_KEY: test-key
   GEMINI_API_KEY: test-key
   ANTHROPIC_API_KEY: test-key
+  # Each job gets its own interpreter and virtualenv. A persistent runner
+  # shares one setup-python toolcache, so jobs use a managed Python only.
+  UV_PYTHON_PREFERENCE: only-managed
+  UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+  UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -179,23 +184,11 @@ jobs:
         run: uv python install 3.14
 
       - name: Install ffmpeg
-        # The full tests/ tree (e2e + conversion tests) drives the real Converter,
-        # which shells out to ffmpeg. The ubuntu-latest image does not ship it, so
-        # install it here; the lighter matrix "Tests" job stays ffmpeg-free.
-        # Each apt command is bounded. A hung Azure mirror must fail this step
-        # instead of occupying the runner until the job timeout.
+        # The full tests/ tree drives the real Converter, which shells out to
+        # ffmpeg. The runner user has no sudo or apt, so the job downloads a
+        # pinned static build into its own directory and checks the sha256.
         timeout-minutes: 8
-        run: |
-          set -euo pipefail
-          for attempt in 1 2 3; do
-            if sudo timeout --kill-after=10s 60s apt-get update \
-              && sudo timeout --kill-after=10s 60s apt-get install -y ffmpeg; then
-              exit 0
-            fi
-            echo "apt ffmpeg install failed on attempt ${attempt}"
-            sleep 5
-          done
-          exit 1
+        run: bash scripts/install_ci_ffmpeg.sh
 
       - name: Sync environment (dev group)
         run: uv sync --locked --python 3.14 --group dev
@@ -338,9 +331,9 @@ jobs:
         run: |
           uv sync --locked --python 3.14 --group dev --no-install-workspace
           wheel=$(find .agent/build -maxdepth 1 -name 'scribe-*.whl' ! -name 'scribe_audio_core-*' -print -quit)
-          uv pip install --python .venv/bin/python --no-deps --reinstall "$wheel"
+          uv pip install --python "$UV_PROJECT_ENVIRONMENT/bin/python" --no-deps --reinstall "$wheel"
           cd .agent
-          ../.venv/bin/scribe --version
+          "$UV_PROJECT_ENVIRONMENT/bin/scribe" --version
 
   # ---------------------------------------------------------------------------
   # Fresh Tool Install

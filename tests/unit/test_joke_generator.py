@@ -341,7 +341,7 @@ class TestHumorConfig:
         """Test default configuration values."""
         cfg = HumorConfig()
 
-        assert cfg.model == "gpt-5.5"
+        assert cfg.model == "gpt-6.1-sol"
         assert cfg.min_words == 10
         assert cfg.max_words == 18
         assert cfg.reasoning_effort == "low"
