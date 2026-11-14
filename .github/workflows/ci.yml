@@ -23,11 +23,10 @@ env:
   XAI_API_KEY: test-key
   GEMINI_API_KEY: test-key
   ANTHROPIC_API_KEY: test-key
-  # Each job gets its own interpreter and virtualenv. A persistent runner
-  # shares one setup-python toolcache, so jobs use a managed Python only.
+  # A persistent runner shares one setup-python toolcache, so jobs use a
+  # managed interpreter only. The install dir and virtualenv are set on each
+  # job, because the runner context is not available at workflow scope.
   UV_PYTHON_PREFERENCE: only-managed
-  UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-  UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -38,6 +37,9 @@ jobs:
   lint-and-types:
     name: Lint + Format + Types (Python 3.14)
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
     steps:
       - name: Checkout
@@ -75,6 +77,9 @@ jobs:
   test:
     name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     strategy:
       fail-fast: false
       matrix:
@@ -121,6 +126,9 @@ jobs:
       || startsWith(github.ref, 'refs/tags/')
       || contains(github.event.pull_request.labels.*.name, 'windows')
     runs-on: ${{ matrix.os }}
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -163,6 +171,9 @@ jobs:
   coverage:
     name: Coverage (Python 3.14)
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     # apt on a hosted runner has hung until the six-hour default job limit.
     timeout-minutes: 30
     needs: [lint-and-types]  # Only run if static checks passed
@@ -219,6 +230,9 @@ jobs:
   security:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
     steps:
       - name: Checkout
@@ -268,6 +282,9 @@ jobs:
   toolchain-check:
     name: Toolchain Sanity (uv + pre-commit)
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
     steps:
       - name: Checkout
@@ -300,6 +317,9 @@ jobs:
   package:
     name: Release Artifact Contract (Python 3.14)
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
     steps:
       - name: Checkout
@@ -343,6 +363,9 @@ jobs:
   fresh-tool-install:
     name: Fresh Tool Install (Python 3.14)
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     timeout-minutes: 15
 
     steps:
@@ -438,6 +461,9 @@ jobs:
   mutation:
     name: Mutation Testing (advisory)
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
+      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     continue-on-error: true
     timeout-minutes: 25  # hard ceiling so an advisory job never churns for hours
     needs: [lint-and-types]
