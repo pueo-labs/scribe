@@ -104,6 +104,8 @@ def test_ffmpeg_and_ffprobe_detection_use_path_env_and_common_locations(tmp_path
         patch("shutil.which", return_value=None),
         patch("scribe.utils.platform.is_windows", return_value=False),
         patch("scribe.utils.platform.is_macos", return_value=False),
+        # An exported override would win before the common locations.
+        patch.dict(os.environ, {"FFMPEG_DIR": "", "PUEO_FFMPEG_DIR": ""}),
         # Candidates are now accepted only if they are executable files; mock that
         # predicate so the first common Linux dir matches.
         patch("scribe.utils.platform._is_executable_file", side_effect=[True, False, False]),
