@@ -24,8 +24,8 @@ env:
   GEMINI_API_KEY: test-key
   ANTHROPIC_API_KEY: test-key
   # A persistent runner shares one setup-python toolcache, so jobs use a
-  # managed interpreter only. The install dir and virtualenv are set on each
-  # job, because the runner context is not available at workflow scope.
+  # managed interpreter only. Each Python job points uv at that job's temp
+  # directory in its first step.
   UV_PYTHON_PREFERENCE: only-managed
 
 jobs:
@@ -37,11 +37,15 @@ jobs:
   lint-and-types:
     name: Lint + Format + Types (Python 3.14)
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -77,15 +81,19 @@ jobs:
   test:
     name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -126,9 +134,6 @@ jobs:
       || startsWith(github.ref, 'refs/tags/')
       || contains(github.event.pull_request.labels.*.name, 'windows')
     runs-on: ${{ matrix.os }}
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -136,6 +141,13 @@ jobs:
         os: [windows-latest, macos-15]
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -171,14 +183,18 @@ jobs:
   coverage:
     name: Coverage (Python 3.14)
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     # apt on a hosted runner has hung until the six-hour default job limit.
     timeout-minutes: 30
     needs: [lint-and-types]  # Only run if static checks passed
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -230,11 +246,15 @@ jobs:
   security:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -282,11 +302,15 @@ jobs:
   toolchain-check:
     name: Toolchain Sanity (uv + pre-commit)
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -317,11 +341,15 @@ jobs:
   package:
     name: Release Artifact Contract (Python 3.14)
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -363,12 +391,16 @@ jobs:
   fresh-tool-install:
     name: Fresh Tool Install (Python 3.14)
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     timeout-minutes: 15
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -461,14 +493,18 @@ jobs:
   mutation:
     name: Mutation Testing (advisory)
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON_INSTALL_DIR: ${{ runner.temp }}/uv-python
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/venv
     continue-on-error: true
     timeout-minutes: 25  # hard ceiling so an advisory job never churns for hours
     needs: [lint-and-types]
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
