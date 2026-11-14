@@ -8,6 +8,7 @@ import pytest
 from scribe.providers.openai_models import (
     CHAT_MODEL,
     IMAGE_MODEL,
+    QUALITY_MODEL,
     TRANSCRIBE_MODEL,
     VISION_MODEL,
     RetiredModelError,
@@ -47,6 +48,12 @@ def test_retired_model_names_its_replacement():
     with pytest.raises(RetiredModelError, match="sunburst") as caught:
         ensure_usable("dall-e-3", today=date(2026, 10, 31))
     assert caught.value.replacement == IMAGE_MODEL
+
+
+def test_retired_text_model_names_the_current_quality_model():
+    with pytest.raises(RetiredModelError, match="terra") as caught:
+        ensure_usable("gpt-4", today=date(2026, 11, 14))
+    assert caught.value.replacement == QUALITY_MODEL
 
 
 def test_image_default_is_the_current_detailed_model():
@@ -111,5 +118,6 @@ def test_openai_ids_are_not_forwarded_to_another_provider():
     assert catalog_model_or_none("gpt-5.6-sol") is None
     assert catalog_model_or_none(VISION_MODEL) is None
     assert catalog_model_or_none(CHAT_MODEL) is None
+    assert catalog_model_or_none(QUALITY_MODEL) is None
     assert catalog_model_or_none(IMAGE_MODEL) is None
     assert catalog_model_or_none("a-local-model") == "a-local-model"

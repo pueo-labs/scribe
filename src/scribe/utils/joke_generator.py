@@ -295,10 +295,12 @@ def _mine_safe_entities(transcript_text: str, top_k: int = 8) -> list[str]:
 def _select_archetype_ai_provider(provider: Any, transcript_excerpt: str) -> str:
     """Use AI provider to intelligently select the best comedy archetype for this meeting."""
 
-    # Gemini 3 with high thinking uses too many tokens for simple selection
-    # Fall back to heuristic for Gemini 3 until thinking_level is properly supported
-    if hasattr(provider, "config") and "gemini-3" in provider.config.model.lower():
-        logger.info("Using heuristic archetype selection for Gemini 3 (thinking overhead too high)")
+    # Gemini 3 and Gemini 4 spend thinking tokens on this short choice.
+    model_name = ""
+    if hasattr(provider, "config"):
+        model_name = provider.config.model.lower()
+    if "gemini-3" in model_name or "gemini-4" in model_name:
+        logger.info("Using heuristic archetype selection for Gemini (thinking overhead too high)")
         return _select_archetype_heuristic({}, None)
 
     # Build archetype descriptions for AI

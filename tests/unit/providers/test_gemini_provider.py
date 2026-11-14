@@ -16,6 +16,8 @@ def test_retired_gemini_alias_names_its_replacement():
         reject_retired_gemini_model("gemini-3.5-flash")
     with pytest.raises(ValueError, match=r"gemini-3\.5-flash-lite"):
         reject_retired_gemini_model("gemini-2.5-flash-lite")
+    with pytest.raises(ValueError, match="carbon"):
+        reject_retired_gemini_model("gemini-2.5-pro")
 
 
 @pytest.fixture
@@ -165,9 +167,9 @@ class TestGeminiProvider:
         assert "config" in call_kwargs
         assert call_kwargs["model"] == "gemini-nano-banana-2.1"
 
-        provider.generate_image("A robot", model="gemini-3.1-flash-image")
+        provider.generate_image("A robot", model="gemini-4-carbon")
         explicit = mock_client.models.generate_content.call_args[1]
-        assert explicit["model"] == "gemini-3.1-flash-image"
+        assert explicit["model"] == "gemini-4-carbon"
 
         provider.generate_image("A robot", model="imagen-other")
         fallback = mock_client.models.generate_content.call_args[1]

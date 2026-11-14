@@ -142,7 +142,7 @@ def test_identify_speakers_disables_ollama_thinking_and_records_source() -> None
 
 def test_cloud_providers_do_not_receive_the_ollama_think_switch() -> None:
     provider = MagicMock()
-    provider.config = MagicMock(provider_name="openai", model="gpt-5.5", timeout=120)
+    provider.config = MagicMock(provider_name="openai", model="gpt-6.1-sol", timeout=120)
     provider.chat_completion_with_json.return_value = {"content": _reply([])}
     identify_speakers(_meeting(), provider)
     assert "think" not in provider.chat_completion_with_json.call_args.kwargs

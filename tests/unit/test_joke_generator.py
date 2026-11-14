@@ -351,10 +351,10 @@ class TestHumorConfig:
     def test_custom_config(self):
         """Test custom configuration values."""
         cfg = HumorConfig(
-            model="gpt-4", min_words=5, max_words=10, api_key="test-key", spice_level=8
+            model="gpt-6.1-sol", min_words=5, max_words=10, api_key="test-key", spice_level=8
         )
 
-        assert cfg.model == "gpt-4"
+        assert cfg.model == "gpt-6.1-sol"
         assert cfg.min_words == 5
         assert cfg.max_words == 10
         assert cfg.api_key == "test-key"
@@ -437,7 +437,7 @@ class TestJokeGeneration:
 
         mock_provider = Mock()
         mock_provider.config.provider_name = "openai"
-        mock_provider.config.model = "gpt-5.2"
+        mock_provider.config.model = "gpt-6.1-sol"
         mock_provider.chat_completion.return_value = {"content": "Test joke about meetings"}
         mock_get_provider.return_value = mock_provider
 
@@ -457,7 +457,7 @@ class TestJokeGeneration:
 
         mock_provider = Mock()
         mock_provider.config.provider_name = "openai"
-        mock_provider.config.model = "gpt-5.2"
+        mock_provider.config.model = "gpt-6.1-sol"
         mock_provider.chat_completion.side_effect = Exception("API Error")
         mock_get_provider.return_value = mock_provider
 
@@ -475,7 +475,7 @@ class TestJokeGeneration:
 
         mock_provider = Mock()
         mock_provider.config.provider_name = "openai"
-        mock_provider.config.model = "gpt-5.2"
+        mock_provider.config.model = "gpt-6.1-sol"
         mock_provider.chat_completion.return_value = {"content": ""}  # Empty response
         mock_get_provider.return_value = mock_provider
 
@@ -507,7 +507,7 @@ class TestJokeGeneration:
         mock_client.responses.create.return_value = mock_response
 
         # Create custom config
-        config = HumorConfig(model="gpt-5", min_words=5, max_words=10, api_key="test-key")
+        config = HumorConfig(model="gpt-6.1-sol", min_words=5, max_words=10, api_key="test-key")
 
         result = generate_transcript_joke(transcript_path, config)
 
@@ -525,7 +525,7 @@ class TestArchetypeSelectionAI:
         resp.output_text = archetype.upper()  # whitespace/case normalized
         client.responses.create.return_value = resp
 
-        assert _select_archetype_ai(client, "meeting about X", "gpt-5.5") == archetype
+        assert _select_archetype_ai(client, "meeting about X", "gpt-6.1-sol") == archetype
 
     def test_select_archetype_ai_uses_configured_model_and_ample_budget(self):
         """Regression: selection must use the Responses API with the configured
@@ -536,13 +536,13 @@ class TestArchetypeSelectionAI:
         resp.output_text = next(iter(COMEDY_STYLES))
         client.responses.create.return_value = resp
 
-        _select_archetype_ai(client, "meeting about X", "gpt-5.5")
+        _select_archetype_ai(client, "meeting about X", "gpt-6.1-sol")
 
         # The legacy path called client.chat.completions with max_completion_tokens=50.
         client.chat.completions.create.assert_not_called()
         client.responses.create.assert_called_once()
         kwargs = client.responses.create.call_args.kwargs
-        assert kwargs["model"] == "gpt-5.5"
+        assert kwargs["model"] == "gpt-6.1-sol"
         assert kwargs["max_output_tokens"] >= 256
         assert kwargs["reasoning"] == {"effort": "minimal"}
 
@@ -553,7 +553,7 @@ class TestArchetypeSelectionAI:
         resp.output_text = ""
         client.responses.create.return_value = resp
 
-        result = _select_archetype_ai(client, "meeting about X", "gpt-5.5")
+        result = _select_archetype_ai(client, "meeting about X", "gpt-6.1-sol")
         assert result in COMEDY_STYLES
 
 

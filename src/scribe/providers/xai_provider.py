@@ -8,6 +8,7 @@ from typing import Any, cast
 from openai import OpenAI  # XAI API is OpenAI-compatible
 
 from scribe.providers.base import AIProvider, ProviderConfig
+from scribe.providers.catalog import XAI_IMAGE_MODEL
 from scribe.utils.costs import add_cost_fields, numeric_attr, usd_from_ticks
 from scribe.utils.network import download_public_image, safe_url_for_logs
 
@@ -83,7 +84,7 @@ class XAIProvider(AIProvider):
 
         logger = logging.getLogger(__name__)
 
-        model = self.config.model or "grok-imagine-image"
+        model = self.config.model or XAI_IMAGE_MODEL
 
         # Try b64_json format first (more reliable than URL)
         try:

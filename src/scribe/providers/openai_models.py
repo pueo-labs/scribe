@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 TRANSCRIBE_MODEL = "gpt-transcribe"
 VISION_MODEL = "gpt-6-luna"
 CHAT_MODEL = "gpt-6.1-sol"
+QUALITY_MODEL = "gpt-6.1-terra"
 IMAGE_MODEL = "gpt-image-2.6-sunburst"
 
 # Chat and image ids that belong to OpenAI. Passing one through to another
@@ -45,8 +46,10 @@ FACTORY_IGNORED_MODELS = frozenset(
         "gpt-5.4",
         "gpt-5.5",
         "gpt-5.6-sol",
+        "gpt-6-astra",
         "gpt-6-luna",
         "gpt-6.1-sol",
+        "gpt-6.1-terra",
         "gpt-image-1",
         "gpt-image-2",
         "gpt-image-2-2026-04-21",
@@ -75,9 +78,9 @@ _SCHEDULED: dict[str, tuple[date, str]] = {
 }
 
 _RETIRED: dict[str, tuple[date, str]] = {
-    "gpt-4": (date(2026, 10, 23), "gpt-5.6-sol"),
-    "gpt-4-0613": (date(2026, 10, 23), "gpt-5.6-sol"),
-    "gpt-4-turbo": (date(2026, 10, 23), "gpt-5.6-sol"),
+    "gpt-4": (date(2026, 10, 23), QUALITY_MODEL),
+    "gpt-4-0613": (date(2026, 10, 23), QUALITY_MODEL),
+    "gpt-4-turbo": (date(2026, 10, 23), QUALITY_MODEL),
     "dall-e-3": (date(2026, 5, 12), IMAGE_MODEL),
     "gpt-image-1": (date(2026, 10, 23), IMAGE_MODEL),
 }

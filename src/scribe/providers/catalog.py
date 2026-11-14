@@ -8,6 +8,14 @@ two services from importing each other.
 from scribe.providers.openai_models import CHAT_MODEL, IMAGE_MODEL, TRANSCRIBE_MODEL
 from scribe.utils.ollama_models import DEFAULT_OLLAMA_MODEL
 
+# Checked 2026-11-14 against the provider model pages.
+XAI_CHAT_MODEL = "grok-4.7"
+XAI_IMAGE_MODEL = "grok-imagine-image-2.0"
+ANTHROPIC_CHAT_MODEL = "claude-sonnet-5-5"
+GEMINI_CHAT_MODEL = "gemini-3.8-flash"
+GEMINI_IMAGE_MODEL = "gemini-nano-banana-2.1"
+GEMINI_PRO_MODEL = "gemini-4-carbon"
+
 _DEFAULT_MODELS: dict[str, dict[str, str | None]] = {
     "openai": {
         "joke": CHAT_MODEL,
@@ -22,32 +30,32 @@ _DEFAULT_MODELS: dict[str, dict[str, str | None]] = {
         "joke": None,
         "meme": None,
         "meme_image": None,
-        "notes": "google/gemini-3.8-flash",
-        "speakers": "google/gemini-3.8-flash",
+        "notes": f"google/{GEMINI_CHAT_MODEL}",
+        "speakers": f"google/{GEMINI_CHAT_MODEL}",
         "transcribe": None,
     },
     "xai": {
-        "joke": "grok-4.3",
-        "meme": "grok-4.3",
-        "meme_image": "grok-imagine-image",
-        "notes": "grok-4.3",
-        "speakers": "grok-4.3",
+        "joke": XAI_CHAT_MODEL,
+        "meme": XAI_CHAT_MODEL,
+        "meme_image": XAI_IMAGE_MODEL,
+        "notes": XAI_CHAT_MODEL,
+        "speakers": XAI_CHAT_MODEL,
         "transcribe": None,
     },
     "anthropic": {
-        "joke": "claude-sonnet-5",
-        "meme": "claude-sonnet-5",
+        "joke": ANTHROPIC_CHAT_MODEL,
+        "meme": ANTHROPIC_CHAT_MODEL,
         "meme_image": None,
-        "notes": "claude-sonnet-5",
-        "speakers": "claude-sonnet-5",
+        "notes": ANTHROPIC_CHAT_MODEL,
+        "speakers": ANTHROPIC_CHAT_MODEL,
         "transcribe": None,
     },
     "gemini": {
-        "joke": "gemini-3.8-flash",
-        "meme": "gemini-3.8-flash",
-        "meme_image": "gemini-nano-banana-2.1",
-        "notes": "gemini-3.8-flash",
-        "speakers": "gemini-3.8-flash",
+        "joke": GEMINI_CHAT_MODEL,
+        "meme": GEMINI_CHAT_MODEL,
+        "meme_image": GEMINI_IMAGE_MODEL,
+        "notes": GEMINI_CHAT_MODEL,
+        "speakers": GEMINI_CHAT_MODEL,
         "transcribe": None,
     },
     # Ollama models are machine-dependent. These values are last-resort
