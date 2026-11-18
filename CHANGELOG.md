@@ -12,6 +12,8 @@ milestones that predate this repository's Git history.
 
 ### Fixed
 
+- The source-only Windows tray now requires the [Go 1.27.4 security release](https://go.dev/doc/devel/release#go1.27.4). Its native verification runs govulncheck v1.10.0.
+
 - The optional Omarchy voice widget follows the shell theme and keeps its
   file reads asynchronous. `MICROPHONE ON` stays written in words. The widget
   still does not claim a live microphone, focus, or recovery record.
