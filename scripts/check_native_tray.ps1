@@ -7,6 +7,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $false
+$govulncheckVersion = "v1.10.0"
 
 if (-not [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
     [System.Runtime.InteropServices.OSPlatform]::Windows
@@ -83,7 +84,7 @@ try {
     Invoke-Checked "go test" { go test ./... }
     Invoke-Checked "go vet" { go vet ./... }
     Invoke-Checked "govulncheck" {
-        go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+        go run "golang.org/x/vuln/cmd/govulncheck@$govulncheckVersion" ./...
     }
 
     $env:CGO_ENABLED = "0"
@@ -157,7 +158,7 @@ try {
         source_commit = $head
         source_dirty = $sourceDirty
         go_version = (& go version).Trim()
-        govulncheck_version = "v1.6.0"
+        govulncheck_version = $govulncheckVersion
         resolved_module_graph_sha256 = $resolvedModuleGraphDigest
         resolved_modules = $resolvedModules
         build_command = "go build -trimpath -buildvcs=true -ldflags=`"-s -w`""
