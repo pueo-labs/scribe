@@ -16,7 +16,7 @@ This mirrors Scribe's existing bake-off pattern (``joke_bakeoff`` /
 ``meme_bakeoff``) but emits a scorecard instead of picking a single winner.
 
 A provider spec is ``"<provider>"`` or ``"<provider>:<model>"``, e.g.
-``"openai"``, ``"openai:gpt-5.4"``, ``"ollama:qwen2.5:14b"`` (note the model
+``"openai"``, ``"openai:gpt-6.1-sol"``, ``"ollama:qwen2.5:14b"`` (note the model
 itself may contain colons - only the first colon is the separator).
 """
 

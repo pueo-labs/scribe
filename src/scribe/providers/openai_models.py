@@ -1,7 +1,7 @@
 """OpenAI model ids Scribe will send, and the shutdown dates that constrain them.
 
 Dates were checked against https://developers.openai.com/api/docs/deprecations
-on 2026-10-31. A scheduled id stays available as an explicit override until its
+on 2026-11-14. A scheduled id stays available as an explicit override until its
 shutdown date. A retired id is refused. Local Whisper is unaffected.
 
 ``gpt-transcribe`` is the file-transcription default. It does not return
@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 
 TRANSCRIBE_MODEL = "gpt-transcribe"
 VISION_MODEL = "gpt-6-luna"
-IMAGE_MODEL = "gpt-image-2"
+CHAT_MODEL = "gpt-6.1-sol"
+QUALITY_MODEL = "gpt-6.1-terra"
+IMAGE_MODEL = "gpt-image-2.6-sunburst"
 
 # Chat and image ids that belong to OpenAI. Passing one through to another
 # provider selects that provider's catalog default instead.
@@ -36,6 +38,7 @@ FACTORY_IGNORED_MODELS = frozenset(
         "gpt-4o-2024-11-20",
         "gpt-4o-mini-transcribe",
         "gpt-4o-mini-transcribe-2025-03-20",
+        "gpt-4o-mini-transcribe-2025-12-15",
         "gpt-4o-transcribe",
         "gpt-4o-transcribe-diarize",
         "gpt-5",
@@ -43,9 +46,15 @@ FACTORY_IGNORED_MODELS = frozenset(
         "gpt-5.4",
         "gpt-5.5",
         "gpt-5.6-sol",
+        "gpt-6-astra",
         "gpt-6-luna",
+        "gpt-6.1-sol",
+        "gpt-6.1-terra",
         "gpt-image-1",
         "gpt-image-2",
+        "gpt-image-2-2026-04-21",
+        "gpt-image-2.6-flare",
+        "gpt-image-2.6-sunburst",
         "gpt-live-transcribe",
         "gpt-transcribe",
         "whisper-1",
@@ -62,13 +71,16 @@ _SCHEDULED: dict[str, tuple[date, str]] = {
     "gpt-4o-transcribe": (date(2027, 2, 26), TRANSCRIBE_MODEL),
     "gpt-4o-mini-transcribe": (date(2027, 2, 26), TRANSCRIBE_MODEL),
     "gpt-4o-mini-transcribe-2025-03-20": (date(2027, 1, 20), TRANSCRIBE_MODEL),
+    "gpt-4o-mini-transcribe-2025-12-15": (date(2027, 2, 26), TRANSCRIBE_MODEL),
     "gpt-4o-transcribe-diarize": (date(2027, 2, 26), TRANSCRIBE_MODEL),
+    "gpt-image-2": (date(2027, 2, 10), IMAGE_MODEL),
+    "gpt-image-2-2026-04-21": (date(2027, 2, 10), IMAGE_MODEL),
 }
 
 _RETIRED: dict[str, tuple[date, str]] = {
-    "gpt-4": (date(2026, 10, 23), "gpt-5.6-sol"),
-    "gpt-4-0613": (date(2026, 10, 23), "gpt-5.6-sol"),
-    "gpt-4-turbo": (date(2026, 10, 23), "gpt-5.6-sol"),
+    "gpt-4": (date(2026, 10, 23), QUALITY_MODEL),
+    "gpt-4-0613": (date(2026, 10, 23), QUALITY_MODEL),
+    "gpt-4-turbo": (date(2026, 10, 23), QUALITY_MODEL),
     "dall-e-3": (date(2026, 5, 12), IMAGE_MODEL),
     "gpt-image-1": (date(2026, 10, 23), IMAGE_MODEL),
 }

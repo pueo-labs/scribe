@@ -23,10 +23,10 @@ class TestAnthropicProvider:
         except ImportError:
             pytest.skip("anthropic package not installed")
 
-        provider = AnthropicProvider(api_key="test-key", model="claude-sonnet-5")
+        provider = AnthropicProvider(api_key="test-key", model="claude-sonnet-5-5")
 
         assert provider.api_key == "test-key"
-        assert provider.model == "claude-sonnet-5"
+        assert provider.model == "claude-sonnet-5-5"
         mock_anthropic_client.assert_called_once_with(api_key="test-key")
 
     def test_init_without_api_key_raises_error(self, mock_anthropic_client):
@@ -73,7 +73,7 @@ class TestAnthropicProvider:
         # Verify API call
         mock_client_instance.messages.create.assert_called_once()
         call_args = mock_client_instance.messages.create.call_args[1]
-        assert call_args["model"] == "claude-sonnet-5"
+        assert call_args["model"] == "claude-sonnet-5-5"
         assert call_args["max_tokens"] == 100
         assert call_args["system"] == "You are helpful"
         assert len(call_args["messages"]) == 1
@@ -81,7 +81,7 @@ class TestAnthropicProvider:
         assert call_args["messages"][0]["content"] == "Hello"
 
     def test_chat_completion_omits_none_temperature(self, mock_anthropic_client):
-        """temperature=None must not be sent (the Anthropic API rejects an explicit null)."""
+        """Current Claude models reject temperature, including an explicit value."""
         try:
             from scribe.providers.anthropic_provider import AnthropicProvider
         except ImportError:
@@ -100,7 +100,7 @@ class TestAnthropicProvider:
         assert "temperature" not in mock_client_instance.messages.create.call_args[1]
 
         provider.chat_completion([{"role": "user", "content": "hi"}], temperature=0.5)
-        assert mock_client_instance.messages.create.call_args[1]["temperature"] == 0.5
+        assert "temperature" not in mock_client_instance.messages.create.call_args[1]
 
     def test_chat_completion_without_system_message(self, mock_anthropic_client):
         """Test chat completion without system message."""
@@ -192,7 +192,7 @@ class TestAnthropicProviderFactory:
             provider = get_provider(feature="joke", provider_name="anthropic", api_key="test-key")
 
             assert provider is not None
-            assert provider.model == "claude-sonnet-5"
+            assert provider.model == "claude-sonnet-5-5"
 
     def test_anthropic_provider_not_available_raises_error(self):
         """Test that missing anthropic package raises ImportError."""

@@ -384,7 +384,7 @@ class ScribeConfig(BaseSettings):
         default=False,
         description=(
             "Enable automatic meme generation. Off by default because it calls a "
-            "paid image-generation API (e.g. xAI Grok Imagine, OpenAI gpt-image-2) "
+            "paid image-generation API (e.g. xAI Grok Imagine, gpt-image-2.6-sunburst) "
             "with a multi-attempt QA loop. Enable automatically via "
             "SCRIBE_ENABLE_MEME=true, the user config file, or scribe init; or "
             "generate on demand with `scribe meme <transcript>`."

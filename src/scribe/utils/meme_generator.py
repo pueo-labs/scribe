@@ -1,8 +1,7 @@
 """
-Agentic AI Meme Generation for Meeting Transcripts
+Meme generation for meeting transcripts.
 
-Uses GPT-5 to analyze transcript and create meme concept,
-then generates the meme image using OpenAI's image generation API.
+A text model drafts the meme concept, then an image model renders it.
 """
 
 import base64
@@ -17,6 +16,7 @@ from typing import Any, Literal, TypedDict, cast
 from dotenv import find_dotenv, load_dotenv
 from openai import AuthenticationError, OpenAI
 
+from scribe.providers.openai_models import CHAT_MODEL, IMAGE_MODEL
 from scribe.utils.transcript_loader import load_transcript_text
 
 # Load environment
@@ -38,8 +38,8 @@ logger.propagate = False  # Don't propagate to root logger
 class MemeConfig:
     """Configuration for meme generation."""
 
-    model: str = "gpt-5.5"
-    image_model: str = "gpt-image-2"
+    model: str = CHAT_MODEL
+    image_model: str = IMAGE_MODEL
     size: str = "1024x1024"  # Default square, but will be overridden by template needs
     quality: str = "high"
     output_format: str = "png"
@@ -129,7 +129,7 @@ def _analyze_transcript_for_meme(
     make_safer: bool = False,
 ) -> dict[str, Any] | None:
     """
-    Use GPT-5 to analyze transcript and create meme concept.
+    Draft a meme concept from the transcript.
 
     Returns dict with:
         - template: Meme template description (e.g., "Distracted Boyfriend", "Drake Hotline Bling")
@@ -137,7 +137,7 @@ def _analyze_transcript_for_meme(
         - bottom_text: Text for bottom of meme
         - image_prompt: Detailed prompt for image generation
         - concept: Brief explanation of the meme concept
-        - reasoning: (optional) GPT-5's reasoning process if show_reasoning=True
+        - reasoning: (optional) the model's reasoning process if show_reasoning=True
         - transcript_length: Character count of analyzed transcript (for transparency)
     """
     # Log transcript length for transparency
@@ -406,7 +406,7 @@ Respond with valid JSON only.""",
 
         if api_reasoning:
             meme_concept["api_reasoning"] = api_reasoning
-            logger.info(f"GPT-5 API reasoning captured ({len(api_reasoning)} items)")
+            logger.info(f"API reasoning captured ({len(api_reasoning)} items)")
 
         if "opportunities" in meme_concept:
             logger.info(
@@ -418,7 +418,7 @@ Respond with valid JSON only.""",
         # Show reasoning if requested (for trust/validation)
         if show_reasoning:
             print("\n" + "=" * 80)
-            print("GPT-5 MEMETIC ANALYSIS (PhD-Level Transparency)")
+            print("MEMETIC ANALYSIS")
             print("=" * 80)
             print(f"\nTranscript analyzed: {transcript_length} characters")
 
@@ -464,7 +464,7 @@ Respond with valid JSON only.""",
             # API-level reasoning (if available)
             if api_reasoning:
                 print("\n" + "-" * 80)
-                print("GPT-5 API REASONING (Low-Level)")
+                print("API REASONING")
                 print("-" * 80)
                 for i, reasoning in enumerate(api_reasoning, 1):
                     print(f"\n{i}. {reasoning}")
@@ -889,7 +889,7 @@ def generate_meeting_meme(
         output_dir: Directory to save meme (defaults to same dir as transcript)
         api_key: API key (or uses provider-specific env var)
         config: Meme generation config
-        show_reasoning: If True, displays GPT-5's reasoning process (for trust/validation)
+        show_reasoning: If True, displays the model's reasoning process
         progress_callback: Optional callback function(attempt, max_attempts, score) for progress updates
         provider_name: AI provider to use (openai, xai, gemini) - defaults to SCRIBE_MEME_PROVIDER env var
         enable_bakeoff: If True, gets concepts from all providers and picks the funniest

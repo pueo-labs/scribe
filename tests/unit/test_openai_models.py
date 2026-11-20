@@ -6,6 +6,9 @@ from types import SimpleNamespace
 import pytest
 
 from scribe.providers.openai_models import (
+    CHAT_MODEL,
+    IMAGE_MODEL,
+    QUALITY_MODEL,
     TRANSCRIBE_MODEL,
     VISION_MODEL,
     RetiredModelError,
@@ -42,9 +45,32 @@ def test_diarize_override_keeps_speaker_json_until_shutdown():
 
 
 def test_retired_model_names_its_replacement():
-    with pytest.raises(RetiredModelError, match="gpt-image-2") as caught:
+    with pytest.raises(RetiredModelError, match="sunburst") as caught:
         ensure_usable("dall-e-3", today=date(2026, 10, 31))
-    assert caught.value.replacement == "gpt-image-2"
+    assert caught.value.replacement == IMAGE_MODEL
+
+
+def test_retired_text_model_names_the_current_quality_model():
+    with pytest.raises(RetiredModelError, match="terra") as caught:
+        ensure_usable("gpt-4", today=date(2026, 11, 14))
+    assert caught.value.replacement == QUALITY_MODEL
+
+
+def test_image_default_is_the_current_detailed_model():
+    assert IMAGE_MODEL == "gpt-image-2.6-sunburst"
+    assert CHAT_MODEL == "gpt-6.1-sol"
+
+
+def test_deprecated_image_override_remains_usable_until_shutdown():
+    notice = ensure_usable("gpt-image-2", today=date(2026, 11, 14))
+    assert notice is not None
+    assert notice.retired is False
+    assert notice.replacement == IMAGE_MODEL
+
+
+def test_deprecated_image_override_is_refused_on_shutdown():
+    with pytest.raises(RetiredModelError, match="sunburst"):
+        ensure_usable("gpt-image-2", today=date(2027, 2, 10))
 
 
 def test_scheduled_model_remains_usable_before_shutdown():
@@ -72,7 +98,7 @@ def test_live_date_cannot_revive_a_retired_model():
     notice = notice_for_configured_model("dall-e-3", page, today=date(2026, 10, 31))
     assert notice is not None
     assert notice.retired is True
-    assert notice.replacement == "gpt-image-2"
+    assert notice.replacement == IMAGE_MODEL
 
 
 def test_mock_model_page_does_not_invent_a_shutdown():
@@ -91,4 +117,7 @@ def test_openai_ids_are_not_forwarded_to_another_provider():
     assert catalog_model_or_none("gpt-4o") is None
     assert catalog_model_or_none("gpt-5.6-sol") is None
     assert catalog_model_or_none(VISION_MODEL) is None
+    assert catalog_model_or_none(CHAT_MODEL) is None
+    assert catalog_model_or_none(QUALITY_MODEL) is None
+    assert catalog_model_or_none(IMAGE_MODEL) is None
     assert catalog_model_or_none("a-local-model") == "a-local-model"
