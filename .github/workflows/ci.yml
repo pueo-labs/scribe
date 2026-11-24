@@ -23,6 +23,10 @@ env:
   XAI_API_KEY: test-key
   GEMINI_API_KEY: test-key
   ANTHROPIC_API_KEY: test-key
+  # A persistent runner shares one setup-python toolcache, so jobs use a
+  # managed interpreter only. Each Python job points uv at that job's temp
+  # directory in its first step.
+  UV_PYTHON_PREFERENCE: only-managed
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -35,6 +39,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -76,6 +87,13 @@ jobs:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -123,6 +141,13 @@ jobs:
         os: [windows-latest, macos-15]
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -163,6 +188,13 @@ jobs:
     needs: [lint-and-types]  # Only run if static checks passed
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -179,23 +211,11 @@ jobs:
         run: uv python install 3.14
 
       - name: Install ffmpeg
-        # The full tests/ tree (e2e + conversion tests) drives the real Converter,
-        # which shells out to ffmpeg. The ubuntu-latest image does not ship it, so
-        # install it here; the lighter matrix "Tests" job stays ffmpeg-free.
-        # Each apt command is bounded. A hung Azure mirror must fail this step
-        # instead of occupying the runner until the job timeout.
+        # The full tests/ tree drives the real Converter, which shells out to
+        # ffmpeg. The runner user has no sudo or apt, so the job downloads a
+        # pinned static build into its own directory and checks the sha256.
         timeout-minutes: 8
-        run: |
-          set -euo pipefail
-          for attempt in 1 2 3; do
-            if sudo timeout --kill-after=10s 60s apt-get update \
-              && sudo timeout --kill-after=10s 60s apt-get install -y ffmpeg; then
-              exit 0
-            fi
-            echo "apt ffmpeg install failed on attempt ${attempt}"
-            sleep 5
-          done
-          exit 1
+        run: bash scripts/install_ci_ffmpeg.sh
 
       - name: Sync environment (dev group)
         run: uv sync --locked --python 3.14 --group dev
@@ -228,6 +248,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -277,6 +304,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -309,6 +343,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -338,9 +379,9 @@ jobs:
         run: |
           uv sync --locked --python 3.14 --group dev --no-install-workspace
           wheel=$(find .agent/build -maxdepth 1 -name 'scribe-*.whl' ! -name 'scribe_audio_core-*' -print -quit)
-          uv pip install --python .venv/bin/python --no-deps --reinstall "$wheel"
+          uv pip install --python "$UV_PROJECT_ENVIRONMENT/bin/python" --no-deps --reinstall "$wheel"
           cd .agent
-          ../.venv/bin/scribe --version
+          "$UV_PROJECT_ENVIRONMENT/bin/scribe" --version
 
   # ---------------------------------------------------------------------------
   # Fresh Tool Install
@@ -353,6 +394,13 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -450,6 +498,13 @@ jobs:
     needs: [lint-and-types]
 
     steps:
+      - name: Isolate Python
+        shell: bash
+        run: |
+          mkdir -p "${RUNNER_TEMP}/uv-python"
+          printf 'UV_PYTHON_INSTALL_DIR=%s\n' "${RUNNER_TEMP}/uv-python" >> "$GITHUB_ENV"
+          printf 'UV_PROJECT_ENVIRONMENT=%s\n' "${RUNNER_TEMP}/venv" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

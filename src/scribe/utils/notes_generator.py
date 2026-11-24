@@ -16,6 +16,7 @@ from openai import OpenAI
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from scribe.exceptions import ScribeError
+from scribe.providers.openai_models import CHAT_MODEL
 from scribe.utils.logging import get_logger
 from scribe.utils.notes_content import (
     BREAKDOWN_KEYS,
@@ -71,7 +72,7 @@ class NotesConfig:
     """Configuration for notes generation."""
 
     api_key: str
-    model: str = "gpt-5.5"
+    model: str = CHAT_MODEL
     max_retries: int = 3
     confidence_threshold: float = 0.85
 
@@ -165,7 +166,7 @@ class NotesGenerator:
 
             self.config = NotesConfig(
                 api_key=self.api_key,
-                model=model or "gpt-5.5",
+                model=model or CHAT_MODEL,
                 max_retries=max_retries,
             )
 
@@ -287,11 +288,11 @@ class NotesGenerator:
 
         return final_path
 
-    # ---------------- Core GPT-5 Call ----------------
+    # ---------------- Core text call ----------------
 
     def _extract_output_text(self, resp: Any) -> str:
         """
-        Extract text from GPT-5 Responses API response.
+        Extract text from a Responses API response.
         """
         text = getattr(resp, "output_text", None)
         if text:

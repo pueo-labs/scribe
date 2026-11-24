@@ -1,8 +1,9 @@
 """
 Google Gemini provider implementation.
 
-Current text default is ``gemini-3.8-flash``. The flagship is ``gemini-4-argon``
-and the budget model is ``gemini-3.5-flash-lite``. Image generation defaults to
+Current text default is ``gemini-3.8-flash``. Pro roles use ``gemini-4-carbon``.
+``gemini-4-argon`` is the efficient Gemini 4 model, and the budget model is
+``gemini-3.5-flash-lite``. Image generation defaults to
 ``gemini-nano-banana-2.1``. Retired ids fail with the replacement name.
 """
 
@@ -12,6 +13,7 @@ import io
 from typing import Any, cast
 
 from scribe.providers.base import AIProvider, ProviderConfig
+from scribe.providers.catalog import GEMINI_PRO_MODEL
 
 RETIRED_GEMINI_MODELS = {
     "gemini-3.5-flash": "gemini-3.8-flash",
@@ -19,7 +21,7 @@ RETIRED_GEMINI_MODELS = {
     "gemini-3.7-flash": "gemini-3.8-flash",
     "gemini-2.5-flash": "gemini-3.8-flash",
     "gemini-2.5-flash-lite": "gemini-3.5-flash-lite",
-    "gemini-2.5-pro": "gemini-4-argon",
+    "gemini-2.5-pro": GEMINI_PRO_MODEL,
     "gemini-2.0-flash": "gemini-3.8-flash",
 }
 

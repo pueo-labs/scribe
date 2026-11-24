@@ -21,8 +21,8 @@ class TestMemeConfig:
         """Test default meme configuration."""
         config = MemeConfig()
 
-        assert config.model == "gpt-5.5"
-        assert config.image_model == "gpt-image-2"
+        assert config.model == "gpt-6.1-sol"
+        assert config.image_model == "gpt-image-2.6-sunburst"
         assert config.size == "1024x1024"
         assert config.quality == "high"
         assert config.output_format == "png"
@@ -612,7 +612,7 @@ class TestMemeGeneratorHelpers:
         assert result is not None
         assert result["api_reasoning"] == ["reasoning item"]
         assert result["transcript_length"] == len("meeting transcript")
-        assert "GPT-5 MEMETIC ANALYSIS" in capsys.readouterr().out
+        assert "MEMETIC ANALYSIS" in capsys.readouterr().out
 
     def test_analyze_transcript_provider_repairs_json_and_handles_missing_json(self):
         from scribe.utils.meme_generator import _analyze_transcript_for_meme

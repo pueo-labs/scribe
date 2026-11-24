@@ -3,7 +3,6 @@ Unit tests for NotesGenerator.
 
 Tests the meeting notes generation functionality including:
 - Transcript reading and validation
-- GPT-5 API integration
 - Notes formatting and output
 """
 
@@ -30,12 +29,12 @@ class TestNotesGeneratorInit:
         generator = NotesGenerator(api_key="sk-test123")
         assert generator.api_key == "sk-test123"
         # Model may vary depending on the selected provider.
-        assert generator.config.model in ["gpt-5.5", "grok-4.3"]
+        assert generator.config.model in ["gpt-6.1-sol", "grok-4.7"]
 
     def test_init_with_custom_model(self):
         """Test initialization with custom model."""
-        generator = NotesGenerator(api_key="sk-test123", model="gpt-5-mini")
-        assert generator.config.model == "gpt-5-mini"
+        generator = NotesGenerator(api_key="sk-test123", model="gpt-6.1-terra")
+        assert generator.config.model == "gpt-6.1-terra"
 
     def test_init_without_api_key_raises_error(self):
         """Default notes fail locally when no local model can be selected."""
@@ -382,7 +381,7 @@ class TestNotesGeneratorPipeline:
     def test_call_gpt5_api_provider_mode(self):
         provider = Mock()
         provider.config = SimpleNamespace(
-            provider_name="xai", model="grok-4.3", api_key="xai-test-key"
+            provider_name="xai", model="grok-4.7", api_key="xai-test-key"
         )
         provider.chat_completion_with_json.return_value = {
             "content": '{"ok": true}',
@@ -613,7 +612,7 @@ class TestNotesGeneratorIntegration:
             pytest.skip("No valid API key available for integration test")
 
         # Initialize generator
-        generator = NotesGenerator(api_key=api_key, model="gpt-5")
+        generator = NotesGenerator(api_key=api_key, model="gpt-6.1-sol")
 
         # Generate notes
         output_path = tmp_path / "test_notes.md"

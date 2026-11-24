@@ -35,7 +35,7 @@ class TranscriptionSession:
         docx_file: Output formatted document (DOCX)
         log_file: Correlated local diagnostic log
         transcription_method: Method used (local, openai)
-        model_used: Model name (large-v3, gpt-4o-transcribe, etc.)
+        model_used: Model name (large-v3, gpt-transcribe, etc.)
         gpu_info: GPU information if GPU was used
         success: Whether transcription succeeded
         outcome: Precise terminal outcome, including partial and instrumental states

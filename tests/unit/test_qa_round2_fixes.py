@@ -58,7 +58,7 @@ class TestOpenAIEmptyChoices:
             client.chat.completions.create.return_value = response
             mock_openai.return_value = client
             provider = OpenAIProvider(
-                ProviderConfig(provider_name="openai", api_key="sk-x", model="gpt-5")
+                ProviderConfig(provider_name="openai", api_key="sk-x", model="gpt-6.1-sol")
             )
             with pytest.raises(ValueError, match="no choices"):
                 provider.chat_completion([{"role": "user", "content": "hi"}])

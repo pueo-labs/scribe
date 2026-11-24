@@ -49,7 +49,7 @@ class TestParseProviderSpec:
         assert parse_provider_spec("openai") == ("openai", None)
 
     def test_provider_and_simple_model(self):
-        assert parse_provider_spec("openai:gpt-5.4") == ("openai", "gpt-5.4")
+        assert parse_provider_spec("openai:gpt-6.1-sol") == ("openai", "gpt-6.1-sol")
 
     def test_ollama_model_with_colon_preserved(self):
         # Only the first colon splits; the tag keeps its own colon.
@@ -222,7 +222,7 @@ class TestResolveComparePlan:
 
 class TestSummarizeVerdict:
     def test_no_locals_returns_none(self):
-        assert summarize_verdict([_result("openai", "gpt-5.5", 100.0, judge=9.0)]) is None
+        assert summarize_verdict([_result("openai", "gpt-6.1-sol", 100.0, judge=9.0)]) is None
 
     def test_local_only_does_not_treat_shape_as_quality(self):
         verdict = summarize_verdict([_result("ollama", "qwen2.5:14b", 94.0)])
@@ -232,7 +232,7 @@ class TestSummarizeVerdict:
 
     def test_missing_judge_is_not_compared(self):
         results = [
-            _result("openai", "gpt-5.5", 100.0, judge=9.0, cost=0.012),
+            _result("openai", "gpt-6.1-sol", 100.0, judge=9.0, cost=0.012),
             _result("ollama", "qwen2.5:14b", 100.0),
         ]
         verdict = summarize_verdict(results)
@@ -247,7 +247,7 @@ class TestSummarizeVerdict:
 
     def test_local_worth_it_when_close(self):
         results = [
-            _result("openai", "gpt-5.5", 100.0, judge=9.0, cost=0.012),
+            _result("openai", "gpt-6.1-sol", 100.0, judge=9.0, cost=0.012),
             _result("ollama", "qwen2.5:14b", 94.0, judge=8.2),
         ]
         verdict = summarize_verdict(results)
@@ -256,7 +256,7 @@ class TestSummarizeVerdict:
 
     def test_cloud_leads_when_gap_large(self):
         results = [
-            _result("openai", "gpt-5.5", 100.0, judge=9.5, cost=0.012),
+            _result("openai", "gpt-6.1-sol", 100.0, judge=9.5, cost=0.012),
             _result("ollama", "tiny:1b", 60.0, judge=4.0),
         ]
         verdict = summarize_verdict(results)
@@ -309,7 +309,7 @@ class TestFormatScorecard:
             EvalResult(
                 spec="openai",
                 provider="openai",
-                model="gpt-5.5",
+                model="gpt-6.1-sol",
                 ok=True,
                 latency_sec=2.0,
                 cost_usd=0.012,

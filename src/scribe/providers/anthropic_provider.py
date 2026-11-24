@@ -17,7 +17,22 @@ except ImportError:
 
 Anthropic: Any | None = _anthropic_ctor
 
+from scribe.providers.catalog import ANTHROPIC_CHAT_MODEL
+
 from .base import AIProvider, ProviderConfig
+
+# These model families reject temperature, top_p, and top_k.
+_SAMPLING_REJECTED_PREFIXES = (
+    "claude-sonnet-5",
+    "claude-opus-5",
+    "claude-haiku-5",
+    "claude-fable-5",
+)
+
+
+def _rejects_sampling(model: str) -> bool:
+    return model.lower().startswith(_SAMPLING_REJECTED_PREFIXES)
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +43,7 @@ class AnthropicProvider(AIProvider):
     def __init__(
         self,
         api_key: str | None = None,
-        model: str = "claude-sonnet-5",
+        model: str = ANTHROPIC_CHAT_MODEL,
         config: ProviderConfig | None = None,
     ) -> None:
         """
@@ -36,7 +51,7 @@ class AnthropicProvider(AIProvider):
 
         Args:
             api_key: Anthropic API key (defaults to ANTHROPIC_API_KEY env var)
-            model: Model to use (default: claude-sonnet-5)
+            model: Model to use (default: claude-sonnet-5-5)
             config: Provider configuration (optional)
         """
         # Check the runtime symbol rather than only the import flag so tests
@@ -96,14 +111,15 @@ class AnthropicProvider(AIProvider):
                 role = "user" if msg["role"] in ["user", "developer"] else "assistant"
                 user_messages.append({"role": role, "content": msg["content"]})
 
-        # Call Claude API. Only send temperature when set: the Anthropic API rejects
-        # an explicit null, and the structured-JSON path defaults temperature to None.
+        # Omit sampling parameters for current Claude models. Those ids return
+        # an error when temperature, top_p, or top_k is present. Older callers
+        # still pass temperature; it is dropped here rather than sent.
         params: dict[str, Any] = {
             "model": self.model,
             "max_tokens": max_tokens or 4096,
             "messages": user_messages,
         }
-        if temperature is not None:
+        if temperature is not None and not _rejects_sampling(self.model):
             params["temperature"] = temperature
 
         if system_message:

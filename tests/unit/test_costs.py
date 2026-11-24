@@ -25,28 +25,32 @@ def test_gemini_price_steps_follow_the_published_dates():
     flash_later = gemini_text_pricing("gemini-3.8-flash", on=date(2027, 1, 1))
     argon_now = gemini_text_pricing("gemini-4-argon", on=date(2026, 11, 30))
     argon_later = gemini_text_pricing("gemini-4-argon", on=date(2026, 12, 1))
+    carbon_now = gemini_text_pricing("gemini-4-carbon", on=date(2026, 11, 30))
+    carbon_later = gemini_text_pricing("gemini-4-carbon", on=date(2026, 12, 1))
     assert flash_now is not None and flash_now.input_per_million == 0.75
     assert flash_later is not None and flash_later.output_per_million == 7.50
     assert argon_now is not None and argon_now.input_per_million == 2.0
     assert argon_later is not None and argon_later.output_per_million == 20.0
+    assert carbon_now is not None and carbon_now.input_per_million == 2.0
+    assert carbon_later is not None and carbon_later.output_per_million == 20.0
     assert gemini_text_pricing("gemini-3.5-flash") is None
 
 
-def test_estimate_text_cost_usd_for_grok_43():
-    """Test local budget estimate for Grok 4.3."""
+def test_estimate_text_cost_usd_for_grok_47():
+    """Test local budget estimate for Grok 4.7 short-context rates."""
     cost = estimate_text_cost_usd(
-        "grok-4.3",
+        "grok-4.7",
         prompt_tokens=1_000_000,
         completion_tokens=1_000_000,
     )
 
-    assert cost == 3.75
+    assert cost == 8.0
 
 
 def test_add_cost_fields_prefers_provider_exact_cost():
     """Test exact provider costs win over local estimates."""
     usage = add_cost_fields(
-        "grok-4.3",
+        "grok-4.7",
         {"prompt_tokens": 1_000_000, "completion_tokens": 1_000_000, "total_tokens": 2_000_000},
         cost_in_usd_ticks=37_756_000,
     )
@@ -59,11 +63,11 @@ def test_add_cost_fields_prefers_provider_exact_cost():
 def test_add_cost_fields_estimates_known_model_without_exact_cost():
     """Test local estimates are available when exact provider cost is absent."""
     usage = add_cost_fields(
-        "grok-4.20-non-reasoning",
+        "grok-4.7",
         {"prompt_tokens": 1000, "completion_tokens": 2000, "total_tokens": 3000},
     )
 
-    assert usage["estimated_cost_usd"] == 0.00625
+    assert usage["estimated_cost_usd"] == 0.014
     assert usage["cost_source"] == "local_estimate"
 
 
@@ -124,7 +128,7 @@ def test_estimate_text_cost_usd_matches_pricing_math(model: str, prompt: int, co
 )
 def test_add_cost_fields_always_adds_cost_fields(usage: dict, ticks: int | None):
     """add_cost_fields always adds cost_* keys and never removes original data."""
-    result = add_cost_fields("grok-4.3", usage.copy(), cost_in_usd_ticks=ticks)
+    result = add_cost_fields("grok-4.7", usage.copy(), cost_in_usd_ticks=ticks)
 
     # Original keys preserved
     for k in usage:
@@ -148,10 +152,10 @@ import pytest
 def test_estimate_text_cost_usd_pre_contract_rejects_negative_tokens():
     """Preconditions on token counts are enforced by deal in dev/test."""
     with pytest.raises(deal.PreContractError):
-        estimate_text_cost_usd("grok-4.3", -5, 10)
+        estimate_text_cost_usd("grok-4.7", -5, 10)
 
     with pytest.raises(deal.PreContractError):
-        estimate_text_cost_usd("grok-4.3", 10, -1)
+        estimate_text_cost_usd("grok-4.7", 10, -1)
 
 
 def test_usd_from_ticks_pre_contract_rejects_negative_ticks():

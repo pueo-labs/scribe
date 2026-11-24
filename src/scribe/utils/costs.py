@@ -9,7 +9,7 @@ from typing import Any
 import deal
 
 USD_TICKS_PER_DOLLAR = 10_000_000_000
-MODEL_PRICING_LAST_REVIEWED = "2026-10-20"
+MODEL_PRICING_LAST_REVIEWED = "2026-11-14"
 
 
 @dataclass(frozen=True)
@@ -22,18 +22,19 @@ class TextModelPricing:
 
 # Fallback estimates only. Exact provider-returned costs should take precedence.
 TEXT_MODEL_PRICING: dict[str, TextModelPricing] = {
-    "grok-4.3": TextModelPricing(input_per_million=1.25, output_per_million=2.50),
-    "grok-4.3-latest": TextModelPricing(input_per_million=1.25, output_per_million=2.50),
-    "grok-4.20-non-reasoning": TextModelPricing(input_per_million=1.25, output_per_million=2.50),
-    "grok-4.20-non-reasoning-latest": TextModelPricing(
-        input_per_million=1.25,
-        output_per_million=2.50,
-    ),
+    # Short-context rates. Prompts at or above 200k tokens use the long-context
+    # rates on the provider pricing page, which this estimate does not apply.
+    # https://docs.x.ai/developers/models/grok-4.7
+    "grok-4.7": TextModelPricing(input_per_million=2.00, output_per_million=6.00),
     "gemini-3.5-flash-lite": TextModelPricing(input_per_million=0.30, output_per_million=2.50),
 }
 
 # Introductory prices end on these dates. The later row is the following price.
 _GEMINI_PRICE_STEPS: dict[str, tuple[tuple[date, TextModelPricing], TextModelPricing]] = {
+    "gemini-4-carbon": (
+        (date(2026, 12, 1), TextModelPricing(input_per_million=2.0, output_per_million=10.0)),
+        TextModelPricing(input_per_million=4.0, output_per_million=20.0),
+    ),
     "gemini-4-argon": (
         (date(2026, 12, 1), TextModelPricing(input_per_million=2.0, output_per_million=10.0)),
         TextModelPricing(input_per_million=4.0, output_per_million=20.0),
